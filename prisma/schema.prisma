@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String         @id @default(cuid())
+  name      String
+  email     String         @unique
+  phone     String?
+  password  String
+  role      String         @default("user") // "user" or "admin"
+  createdAt DateTime       @default(now())
+  reservations Reservation[]
+
+  @@map("users")
+}
+
+model Court {
+  id            String         @id @default(cuid())
+  name          String
+  image         String         @default("https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=400&h=250&fit=crop")
+  isActive      Boolean        @default(true)
+  price60       Int            @default(20000)
+  price90       Int            @default(30000)
+  openingTime   String         @default("18:00")
+  closingTime   String         @default("23:00")
+  allows60      Boolean        @default(true)
+  allows90      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  reservations  Reservation[]
+  blockedSlots  BlockedSlot[]
+
+  @@map("courts")
+}
+
+model Reservation {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courtId         String
+  court           Court    @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  customerName    String
+  customerPhone   String
+  date            String
+  startTime       String
+  endTime         String
+  durationMinutes Int      @default(60)
+  status          String   @default("confirmed")
+  createdAt       DateTime @default(now())
+
+  @@index([userId, date])
+  @@index([courtId, date])
+  @@map("reservations")
+}
+
+model BlockedSlot {
+  id        String   @id @default(cuid())
+  courtId   String
+  court     Court    @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  date      String
+  startTime String
+  endTime   String
+  reason    String   @default("Mantenimiento")
+
+  @@index([courtId, date])
+  @@map("blocked_slots")
+}

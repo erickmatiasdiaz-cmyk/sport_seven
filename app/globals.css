@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Sport Seven Brand Colors */
+  --brand-primary: #1FA3C8;
+  --brand-primary-light: #E8F7FB;
+  --brand-primary-dark: #1889A8;
+  --brand-secondary: #F7931E;
+  --brand-secondary-light: #FDB14E;
+  --brand-secondary-dark: #E07D0A;
+  --brand-accent: #FFD24A;
+  --brand-accent-light: #FFF3C4;
+  
+  /* Semantic Colors */
+  --status-confirmed: #22c55e;
+  --status-confirmed-bg: #dcfce7;
+  --status-pending: #eab308;
+  --status-pending-bg: #fef9c3;
+  --status-cancelled: #ef4444;
+  --status-cancelled-bg: #fee2e2;
+  --status-occupied: #9ca3af;
+  --status-occupied-bg: #f3f4f6;
+  
+  /* Neutral Colors */
+  --background: #F6F8FA;
+  --text-dark: #1F2937;
+  --text-medium: #4B5563;
+  --text-light: #6B7280;
+}
+
+body {
+  color: var(--text-dark);
+  background: var(--background);
+}
+
+/* Mobile-first container */
+.mobile-container {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--background);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Header container */
+.header-container {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Bottom navbar */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0 8px;
+  z-index: 50;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.bottom-nav a,
+.bottom-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #4B5563;
+  font-size: 10px;
+  padding: 4px 12px;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.bottom-nav a.active,
+.bottom-nav button.active {
+  color: #F7931E;
+}
+
+.bottom-nav a:hover,
+.bottom-nav button:hover {
+  color: #F7931E;
+}
+
+.bottom-nav a svg,
+.bottom-nav button svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 2px;
+}
+
+/* Page content with bottom nav spacing */
+.page-content {
+  padding-bottom: 80px;
+}
+
+/* Card utilities */
+.card-premium {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+/* Image overlay utility */
+.image-overlay {
+  position: relative;
+}
+
+.image-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.15));
+  pointer-events: none;
+}
+
+/* Utility classes for status badges */
+.status-confirmed {
+  background-color: var(--status-confirmed-bg);
+  color: var(--status-confirmed);
+}
+
+.status-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending);
+}
+
+.status-cancelled {
+  background-color: var(--status-cancelled-bg);
+  color: var(--status-cancelled);
+}
+
+/* Hide scrollbar for date chips */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

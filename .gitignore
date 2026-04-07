@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.qwen/
+.env
+.next-dev.log
+tsconfig.tsbuildinfo
+prisma/dev.db
+prisma/dev.db-journal
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
