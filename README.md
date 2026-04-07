@@ -21,7 +21,7 @@ Sistema de reserva de canchas de fútbol con apariencia de aplicación móvil pa
 
 - **Frontend:** Next.js 14+, TypeScript, TailwindCSS, App Router
 - **Backend:** Next.js Route Handlers
-- **Base de datos:** SQLite
+- **Base de datos:** PostgreSQL
 - **ORM:** Prisma
 
 ## Funcionalidades
@@ -43,8 +43,11 @@ Sistema de reserva de canchas de fútbol con apariencia de aplicación móvil pa
 # Instalar dependencias
 npm install
 
+# Configurar variable de entorno
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME?schema=public"
+
 # Ejecutar migraciones de Prisma
-npx prisma migrate dev --name init
+npx prisma migrate deploy
 
 # Cargar datos iniciales (2 canchas de fútbol)
 npx prisma db seed
@@ -54,6 +57,16 @@ npm run dev
 ```
 
 Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
+
+## Despliegue en Vercel
+
+1. Crear una base de datos PostgreSQL remota en Vercel Postgres, Neon o Supabase.
+2. Agregar `DATABASE_URL` en `Project Settings > Environment Variables`.
+3. Volver a desplegar. El build ejecuta automáticamente:
+
+```bash
+prisma generate && prisma migrate deploy && next build
+```
 
 ## Estructura
 
