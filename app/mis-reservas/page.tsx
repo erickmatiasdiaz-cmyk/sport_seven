@@ -16,6 +16,14 @@ interface Reservation {
   endTime: string;
   durationMinutes?: number;
   status: string;
+  createdAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    role: string;
+  };
   court: {
     id: string;
     name: string;
@@ -122,6 +130,15 @@ function MyReservationsContent() {
     return timeStr;
   };
 
+  const formatCreatedAt = (dateTimeStr: string) => {
+    return new Date(dateTimeStr).toLocaleString('es-CL', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   // Calculate countdown in hours and minutes
   const getCountdown = (dateStr: string, startTime: string) => {
     const reservationDate = new Date(`${dateStr}T${startTime}:00`);
@@ -219,13 +236,32 @@ function MyReservationsContent() {
     }
   };
 
+  const showAdminMetadata = user?.role === 'admin';
+
+  const renderReservationMeta = (reservation: Reservation) => {
+    if (!showAdminMetadata) return null;
+
+    return (
+      <div className="mt-3 space-y-1 text-xs text-text-medium">
+        <p>Cliente: {reservation.customerName} | {reservation.customerPhone}</p>
+        <p>
+          Usuario que reservó: {reservation.user?.name || reservation.customerName}
+          {reservation.user?.email ? ` · ${reservation.user.email}` : ''}
+        </p>
+        <p>Hora de creación: {formatCreatedAt(reservation.createdAt)}</p>
+      </div>
+    );
+  };
+
   return (
     <main className="page-content">
       {/* Header */}
       <header className="bg-gradient-to-b from-[#F7931E] to-[#FF8C2A] text-white shadow-lg">
         <div className="header-container px-4 py-4 pb-6 rounded-b-3xl">
-          <h1 className="text-xl font-bold text-white truncate">Mis Reservas</h1>
-          <p className="text-white/80 text-sm mt-1">Gestiona tus reservas</p>
+          <h1 className="text-xl font-bold text-white truncate">{showAdminMetadata ? 'Reservas' : 'Mis Reservas'}</h1>
+          <p className="text-white/80 text-sm mt-1">
+            {showAdminMetadata ? 'Gestiona las reservas del sistema' : 'Gestiona tus reservas'}
+          </p>
         </div>
       </header>
 
@@ -340,6 +376,7 @@ function MyReservationsContent() {
                             <span>{getDurationLabel(reservation)}</span>
                           </div>
                         </div>
+                        {renderReservationMeta(reservation)}
 
                         {/* Countdown or Status Message */}
                         {inProgress ? (
@@ -422,6 +459,7 @@ function MyReservationsContent() {
                             <span className="text-xs">{formatDate(reservation.date)}</span>
                           </div>
                         </div>
+                        {renderReservationMeta(reservation)}
 
                         {/* Price */}
                         {getPriceLabel(reservation) && (
@@ -499,6 +537,7 @@ function MyReservationsContent() {
                             <span>{formatTime(reservation.startTime)} - {formatTime(reservation.endTime)}</span>
                           </div>
                         </div>
+                        {renderReservationMeta(reservation)}
                       </div>
                     );
                   })}
