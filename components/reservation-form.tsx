@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TimeSlot {
   startTime: string;
@@ -28,10 +29,18 @@ export default function ReservationForm({
   userRole,
 }: ReservationFormProps) {
   const router = useRouter();
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
+  const { user } = useAuth();
+  const [customerName, setCustomerName] = useState(user?.name ?? '');
+  const [customerPhone, setCustomerPhone] = useState(user?.phone ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setCustomerName((current) => current || user.name);
+    setCustomerPhone((current) => current || user.phone || '');
+  }, [user]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T12:00:00');
