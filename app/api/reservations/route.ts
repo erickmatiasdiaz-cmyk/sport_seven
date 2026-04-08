@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isSlotAvailable } from '@/lib/availability';
+import { isAdminRequest } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +11,7 @@ export async function GET(request: NextRequest) {
     const courtId = searchParams.get('courtId');
     const userId = searchParams.get('userId');
     const userRole = searchParams.get('userRole');
+    const isAdmin = isAdminRequest(request);
 
     const where: any = {};
 
@@ -37,6 +39,17 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         court: true,
+        user: isAdmin
+          ? {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+              },
+            }
+          : false,
       },
       orderBy: [
         { date: 'asc' },

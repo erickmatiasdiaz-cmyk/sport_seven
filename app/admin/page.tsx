@@ -19,7 +19,27 @@ interface Reservation {
   startTime: string;
   endTime: string;
   status: string;
+  createdAt: string;
   court: Court;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    role: string;
+  };
+}
+
+interface RegisteredUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role: string;
+  createdAt: string;
+  _count: {
+    reservations: number;
+  };
 }
 
 interface BlockedSlot {
@@ -37,9 +57,10 @@ function AdminPage() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+  const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'reservations' | 'block' | 'config'>('reservations');
+  const [activeTab, setActiveTab] = useState<'reservations' | 'block' | 'users' | 'config'>('reservations');
 
   // New reservation form
   const [newReservation, setNewReservation] = useState({
@@ -86,16 +107,23 @@ function AdminPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resRes, resBlocked] = await Promise.all([
-        fetch(`/api/reservations?date=${selectedDate}&userId=${user?.id}&userRole=${user?.role}`),
+      const [resRes, resBlocked, resUsers] = await Promise.all([
+        fetch(`/api/reservations?date=${selectedDate}&userId=${user?.id}&userRole=${user?.role}`, {
+          headers: adminHeaders,
+        }),
         fetch(`/api/blocked-slots?date=${selectedDate}`, {
+          headers: adminHeaders,
+        }),
+        fetch('/api/users', {
           headers: adminHeaders,
         }),
       ]);
       const reservationsData = await resRes.json();
       const blockedData = await resBlocked.json();
+      const usersData = await resUsers.json();
       setReservations(reservationsData);
       setBlockedSlots(blockedData);
+      setUsers(Array.isArray(usersData) ? usersData : []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -202,6 +230,23 @@ function AdminPage() {
     });
   };
 
+  const formatDateTime = (dateTimeStr: string) => {
+    return new Date(dateTimeStr).toLocaleString('es-CL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatCreatedTime = (dateTimeStr: string) => {
+    return new Date(dateTimeStr).toLocaleTimeString('es-CL', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -267,6 +312,16 @@ function AdminPage() {
             }`}
           >
             Bloquear
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'users'
+                ? 'bg-brand-secondary text-white'
+                : 'text-text-medium hover:bg-gray-100'
+            }`}
+          >
+            Usuarios
           </button>
           <button
             onClick={() => window.location.href = '/admin/configuracion'}
@@ -371,6 +426,13 @@ function AdminPage() {
                         {getStatusBadge(res.status)}
                       </div>
                       <p className="text-xs text-gray-600">{res.customerName} | {res.customerPhone}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Reservó: {res.user?.name || res.customerName}
+                        {res.user?.email ? ` · ${res.user.email}` : ''}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Creada a las {formatCreatedTime(res.createdAt)} · {formatDateTime(res.createdAt)}
+                      </p>
                       {res.status !== 'cancelled' && (
                         <button
                           onClick={() => handleCancelReservation(res.id)}
@@ -386,6 +448,52 @@ function AdminPage() {
               )}
             </section>
           </>
+        )}
+
+        {activeTab === 'users' && (
+          <section>
+            <h2 className="text-sm font-semibold text-gray-700 mb-2">
+              Usuarios registrados ({users.length})
+            </h2>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
+                <p className="text-gray-500 text-sm">No hay usuarios registrados</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {users.map((registeredUser) => (
+                  <div key={registeredUser.id} className="bg-white rounded-xl p-3 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-sm text-text-dark">{registeredUser.name}</p>
+                        <p className="text-xs text-gray-600">{registeredUser.email}</p>
+                        <p className="text-xs text-gray-500">
+                          {registeredUser.phone || 'Sin teléfono'}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-xs font-medium px-2 py-1 rounded-full ${
+                          registeredUser.role === 'admin'
+                            ? 'bg-brand-secondary/10 text-brand-secondary'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {registeredUser.role === 'admin' ? 'Admin' : 'Usuario'}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+                      <span>Registrado: {formatDateTime(registeredUser.createdAt)}</span>
+                      <span>{registeredUser._count.reservations} reservas</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {activeTab === 'block' && (
