@@ -42,17 +42,14 @@ function ReservationPageContent() {
         if (!res.ok) throw new Error('Error');
         const data = await res.json();
         setCourts(data);
-        if (!courtIdParam && data.length > 0) {
-          setSelectedCourt(data[0].id);
-          // Set default duration based on court config
-          if (!data[0].allows60 && data[0].allows90) {
-            setDuration(90);
-          }
-        } else if (courtIdParam && data.length > 0) {
-          const selectedCourtData = data.find((c: Court) => c.id === courtIdParam);
-          if (selectedCourtData && !selectedCourtData.allows60 && selectedCourtData.allows90) {
-            setDuration(90);
-          }
+        if (data.length > 0) {
+          const requestedCourt = courtIdParam
+            ? data.find((c: Court) => c.id === courtIdParam)
+            : null;
+          const initialCourt = requestedCourt ?? data[0];
+
+          setSelectedCourt(initialCourt.id);
+          setDuration(initialCourt.allows60 ? 60 : 90);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -84,6 +81,20 @@ function ReservationPageContent() {
 
   const days = getNextDays();
   const selectedCourtData = courts.find((c) => c.id === selectedCourt);
+
+  useEffect(() => {
+    if (!selectedCourtData) return;
+
+    if (duration === 60 && !selectedCourtData.allows60 && selectedCourtData.allows90) {
+      setDuration(90);
+      setSelectedSlot(null);
+    }
+
+    if (duration === 90 && !selectedCourtData.allows90 && selectedCourtData.allows60) {
+      setDuration(60);
+      setSelectedSlot(null);
+    }
+  }, [duration, selectedCourtData]);
 
   if (loading) {
     return (
@@ -119,6 +130,7 @@ function ReservationPageContent() {
                 key={court.id}
                 onClick={() => {
                   setSelectedCourt(court.id);
+                  setDuration(court.allows60 ? 60 : 90);
                   setSelectedSlot(null);
                 }}
                 className={`flex-1 py-3 px-4 rounded-2xl text-sm font-semibold transition-all duration-200 ${
