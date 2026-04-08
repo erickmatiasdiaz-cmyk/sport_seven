@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
 import { isAdminRequest } from '@/lib/auth';
 
 // GET - List all courts (only active ones for non-admin)
 export async function GET(request: NextRequest) {
   try {
+    await ensureBootstrapData();
+
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
     const isAdmin = isAdminRequest(request);

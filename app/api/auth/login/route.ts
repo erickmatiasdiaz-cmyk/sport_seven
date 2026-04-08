@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, createSession } from '@/lib/auth';
 
 // POST /api/auth/login
 export async function POST(request: NextRequest) {
   try {
+    await ensureBootstrapData();
+
     const body = await request.json();
     const { email, password } = body;
 
