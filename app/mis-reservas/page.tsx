@@ -243,12 +243,8 @@ function MyReservationsContent() {
 
     return (
       <div className="mt-3 space-y-1 text-xs text-text-medium">
-        <p>Cliente: {reservation.customerName} | {reservation.customerPhone}</p>
-        <p>
-          Usuario que reservó: {reservation.user?.name || reservation.customerName}
-          {reservation.user?.email ? ` · ${reservation.user.email}` : ''}
-        </p>
-        <p>Hora de creación: {formatCreatedAt(reservation.createdAt)}</p>
+        <p>Reservó: {reservation.user?.name || reservation.customerName}</p>
+        <p>Fecha: {formatCreatedAt(reservation.createdAt)}</p>
       </div>
     );
   };
