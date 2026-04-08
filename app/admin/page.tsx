@@ -427,11 +427,11 @@ function AdminPage() {
                       </div>
                       <p className="text-xs text-gray-600">{res.customerName} | {res.customerPhone}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Reservó: {res.user?.name || res.customerName}
+                        Creó la reserva: {res.user?.name || 'Usuario no disponible'}
                         {res.user?.email ? ` · ${res.user.email}` : ''}
                       </p>
                       <p className="text-xs text-gray-400">
-                        Creada a las {formatCreatedTime(res.createdAt)} · {formatDateTime(res.createdAt)}
+                        Hora de creación: {formatCreatedTime(res.createdAt)} · {formatDateTime(res.createdAt)}
                       </p>
                       {res.status !== 'cancelled' && (
                         <button

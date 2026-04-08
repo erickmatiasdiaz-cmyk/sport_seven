@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function BottomNav() {
   const pathname = usePathname();
   const { user, logout, isAdmin } = useAuth();
+  const adminView = isAdmin && pathname.startsWith('/admin');
 
   // Don't show nav on login/register pages
   if (pathname === '/login' || pathname === '/registro') {
@@ -31,7 +32,7 @@ export default function BottomNav() {
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <span>Mis Reservas</span>
+        <span>{adminView ? 'Reservas' : 'Mis Reservas'}</span>
       </Link>
       {isAdmin && (
         <Link href="/admin" className={pathname.startsWith('/admin') ? 'active' : ''}>
