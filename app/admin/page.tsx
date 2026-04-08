@@ -425,9 +425,11 @@ function AdminPage() {
                         </div>
                         {getStatusBadge(res.status)}
                       </div>
-                      <p className="text-xs text-gray-600">{res.customerName} | {res.customerPhone}</p>
+                      <p className="text-xs text-gray-600">
+                        Cliente: {res.customerName} | {res.customerPhone}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Creó la reserva: {res.user?.name || 'Usuario no disponible'}
+                        Usuario que reservó: {res.user?.name || res.customerName}
                         {res.user?.email ? ` · ${res.user.email}` : ''}
                       </p>
                       <p className="text-xs text-gray-400">
