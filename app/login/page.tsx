@@ -100,15 +100,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-
-        {/* Demo credentials */}
-        <div className="bg-[#E8F7FB] rounded-xl p-4 mt-4">
-          <p className="text-sm font-medium text-[#1FA3C8] mb-2">Credenciales de prueba:</p>
-          <div className="text-xs text-[#1F2937] space-y-1">
-            <p><strong>Admin:</strong> admin@sportseven.cl / admin123</p>
-            <p><strong>Usuario:</strong> usuario@sportseven.cl / user123</p>
-          </div>
-        </div>
       </div>
     </div>
   );
