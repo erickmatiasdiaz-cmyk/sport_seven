@@ -43,129 +43,142 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="page-content bg-gradient-to-b from-[#F6F8FA] to-white min-h-screen">
-      {/* Hero Header Premium */}
-      <header className="bg-gradient-to-b from-[#F7931E] to-[#FF9A2F] shadow-lg rounded-b-[32px]">
-        <div className="header-container px-6 pt-8 pb-10">
-          {/* Top section with greeting and icon */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1 min-w-0">
-              {/* Greeting */}
-              {user ? (
-                <p className="text-white/90 text-sm font-medium mb-1">
-                  Hola, {user.name.split(' ')[0]} 👋
-                </p>
-              ) : (
-                <p className="text-white/90 text-sm font-medium mb-1">
-                  Bienvenido a Sport Seven 👋
-                </p>
-              )}
-              
-              {/* Main title */}
-              <h1 className="text-3xl font-bold text-white mb-2 leading-tight">
-                Sport Seven
-              </h1>
-              
-              {/* Subtitle */}
-              <p className="text-white/85 text-base font-medium">
-                Reserva tu cancha de fútbol en segundos
+    <main className="page-content bg-[#F8FAFC] min-h-screen">
+      {/* Compact Premium Hero Header */}
+      <header className="relative overflow-hidden">
+        {/* Gradient background with subtle pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#F7931E] via-[#F7931E] to-[#F59E0B]"></div>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-2 right-8 w-20 h-20 bg-white rounded-full"></div>
+          <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white rounded-full"></div>
+        </div>
+        
+        <div className="relative header-container px-5 pt-6 pb-5">
+          {/* Top row: greeting + login */}
+          <div className="flex items-center justify-between mb-4">
+            {user ? (
+              <p className="text-white/90 text-sm font-medium">
+                Hola, {user.name.split(' ')[0]} 👋
               </p>
-            </div>
+            ) : (
+              <p className="text-white/90 text-sm font-medium">
+                Bienvenido a Sport Seven
+              </p>
+            )}
             
-            {/* Icon with elegant background */}
-            <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-              {!user && (
-                <Link href="/login" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border border-white/30">
-                  Ingresar
-                </Link>
-              )}
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full border border-white/30">
-                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
+            {!user && (
+              <Link
+                href="/login"
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border border-white/30"
+              >
+                Ingresar
+              </Link>
+            )}
           </div>
-          
-          {/* Schedule badge */}
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2.5 rounded-full border border-white/30">
+
+          {/* Main title block */}
+          <div className="mb-4">
+            <h1 className="text-2xl font-extrabold text-white leading-tight tracking-tight">
+              Reserva tu cancha<br />en segundos
+            </h1>
+            <p className="text-white/80 text-sm mt-1 font-medium">
+              Gestiona horarios y reservas en tiempo real
+            </p>
+          </div>
+
+          {/* Status badge */}
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3.5 py-2 rounded-full border border-white/30">
             <div className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse"></div>
-            <span className="text-white text-sm font-semibold">
-              Abierto hoy {sharedOpeningTime} - {sharedClosingTime}
+            <span className="text-white text-xs font-semibold">
+              Abierto hoy {sharedOpeningTime} – {sharedClosingTime}
             </span>
           </div>
         </div>
       </header>
 
-      {/* Info cards block */}
-      <section className="px-4 -mt-6 mb-6">
-        <div className="bg-white rounded-3xl shadow-md p-5 border border-gray-100">
-          <div className="grid grid-cols-3 gap-4">
-            {/* Canchas */}
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-[#E8F7FB] p-2.5 rounded-2xl mb-2">
-                <svg className="w-5 h-5 text-[#1FA3C8]" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm2-1a1 1 0 00-1 1v1h14V4a1 1 0 00-1-1H4zm14 3v1a1 1 0 01-1 1H5a1 1 0 01-1-1V6h14zM4 12v4h12v-4H4z" />
-                </svg>
-              </div>
-              <p className="text-text-dark font-bold text-lg leading-tight">{courts.length}</p>
-              <p className="text-text-light text-xs font-medium">Canchas</p>
+      {/* Metric Cards - SaaS Style */}
+      <section className="px-4 -mt-4 mb-6">
+        <div className="grid grid-cols-3 gap-3">
+          {/* Canchas */}
+          <div className="metric-card animate-fade-in-up">
+            <div className="metric-icon bg-gradient-to-br from-[#E8F7FB] to-[#D4F0F8]">
+              <svg className="w-6 h-6 text-[#1FA3C8]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+              </svg>
             </div>
-            
-            {/* Reserva rápida */}
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-[#FFF3C4] p-2.5 rounded-2xl mb-2">
-                <svg className="w-5 h-5 text-[#F7931E]" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-text-dark font-bold text-sm leading-tight">Rápida</p>
-              <p className="text-text-light text-xs font-medium">Reserva</p>
+            <div className="metric-value">{courts.length}</div>
+            <div className="metric-label">Canchas</div>
+          </div>
+
+          {/* Reserva Rápida */}
+          <div className="metric-card animate-fade-in-up">
+            <div className="metric-icon bg-gradient-to-br from-[#FFF3C4] to-[#FDE68A]">
+              <svg className="w-6 h-6 text-[#F7931E]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 1.45-.39 2.81-1.06 3.98l1.46 1.46C21.41 15.89 22 14.02 22 12c0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V3.03c-4.06.5-7.18 3.91-7.18 8.03 0 4.51 3.66 8.17 8.18 8.17 1.85 0 3.55-.62 4.92-1.66l-1.46-1.46A4.952 4.952 0 0112 19z" />
+                <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
+              </svg>
             </div>
-            
-            {/* Horarios */}
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-[#E8F7FB] p-2.5 rounded-2xl mb-2">
-                <svg className="w-5 h-5 text-[#1FA3C8]" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 011 1v3a1 1 0 11-2 0V8a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-text-dark font-bold text-sm leading-tight">
-                {courts.length > 0
-                  ? Math.max(
-                      ...courts.map((court) => {
-                        const openHour = Number((court.openingTime ?? '18:00').split(':')[0]);
-                        const closeHour = Number((court.closingTime ?? '23:00').split(':')[0]);
-                        return Math.max(closeHour - openHour, 0);
-                      })
-                    )
-                  : 0}
-              </p>
-              <p className="text-text-light text-xs font-medium">Horarios</p>
+            <div className="metric-value text-[#F7931E] text-2xl">⚡</div>
+            <div className="metric-label">Rápida</div>
+          </div>
+
+          {/* Horarios */}
+          <div className="metric-card animate-fade-in-up">
+            <div className="metric-icon bg-gradient-to-br from-[#DCFCE7] to-[#BBF7D0]">
+              <svg className="w-6 h-6 text-[#22c55e]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
+              </svg>
             </div>
+            <div className="metric-value">
+              {courts.length > 0
+                ? Math.max(
+                    ...courts.map((court) => {
+                      const openHour = Number((court.openingTime ?? '18:00').split(':')[0]);
+                      const closeHour = Number((court.closingTime ?? '23:00').split(':')[0]);
+                      return Math.max(closeHour - openHour, 0);
+                    })
+                  )
+                : 0}
+            </div>
+            <div className="metric-label">Horas</div>
           </div>
         </div>
       </section>
 
       {/* Courts List */}
-      <section className="px-4 mt-8">
+      <section className="px-4">
         {/* Section header */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-text-dark mb-1.5">
-            Canchas disponibles
-          </h2>
-          <p className="text-text-light text-sm">
-            Selecciona una cancha y revisa sus horarios
-          </p>
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-[#0F172A]">
+              Canchas disponibles
+            </h2>
+            <p className="text-[#64748B] text-sm">
+              Selecciona una cancha y revisa sus horarios
+            </p>
+          </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F7931E]"></div>
+          <div className="space-y-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="card-premium overflow-hidden">
+                <div className="skeleton skeleton-image rounded-none h-52"></div>
+                <div className="p-5">
+                  <div className="skeleton skeleton-title"></div>
+                  <div className="skeleton skeleton-text" style={{ width: '80%' }}></div>
+                  <div className="skeleton skeleton-text" style={{ width: '50%' }}></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="space-y-6 pb-6">
-            {courts.map((court) => <CourtCard key={court.id} court={court} />)}
+          <div className="space-y-5 pb-6">
+            {courts.map((court) => (
+              <div key={court.id} className="animate-fade-in-up">
+                <CourtCard court={court} />
+              </div>
+            ))}
           </div>
         )}
       </section>

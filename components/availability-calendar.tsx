@@ -110,53 +110,74 @@ export default function AvailabilityCalendar({
   const isSelected = (slot: TimeSlot) =>
     selectedSlot?.startTime === slot.startTime && selectedSlot?.endTime === slot.endTime;
 
+  // Skeleton loading
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1FA3C8]"></div>
+      <div>
+        {/* Skeleton Legend */}
+        <div className="flex flex-wrap gap-3 mb-4 pb-4 border-b border-[#E2E8F0]">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <div className="skeleton w-3 h-3 rounded-full"></div>
+              <div className="skeleton w-16 h-3 rounded"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Grid */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton h-16 rounded-2xl"></div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-6 text-[#ef4444] text-sm">
-        {error}
+      <div className="text-center py-8 animate-fade-in">
+        <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg className="w-6 h-6 text-[#ef4444]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <p className="text-[#64748B] text-sm">{error}</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="animate-fade-in">
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-4 pb-4 border-b border-[#E5E7EB]">
+      <div className="flex flex-wrap gap-3 mb-4 pb-4 border-b border-[#E2E8F0]">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-white border-2 border-[#1FA3C8]"></div>
-          <span className="text-[11px] text-[#6B7280]">Disponible</span>
+          <div className="w-3 h-3 rounded-full bg-white border-2 border-[#1FA3C8] shadow-sm"></div>
+          <span className="text-[11px] text-[#64748B] font-medium">Disponible</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[#1FA3C8]"></div>
-          <span className="text-[11px] text-[#6B7280]">Seleccionado</span>
+          <div className="w-3 h-3 rounded-full bg-[#1FA3C8] shadow-sm"></div>
+          <span className="text-[11px] text-[#64748B] font-medium">Seleccionado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[#F3F4F6]"></div>
-          <span className="text-[11px] text-[#6B7280]">Ocupado</span>
+          <div className="w-3 h-3 rounded-full bg-[#F1F5F9]"></div>
+          <span className="text-[11px] text-[#64748B] font-medium">Ocupado</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-[#fee2e2]"></div>
-          <span className="text-[11px] text-[#6B7280]">Bloqueado</span>
+          <span className="text-[11px] text-[#64748B] font-medium">Bloqueado</span>
         </div>
         <div className="flex items-center gap-1.5 ml-auto">
-          <svg className="w-3.5 h-3.5 text-[#6B7280]" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-3.5 h-3.5 text-[#64748B]" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
           </svg>
-          <span className="text-[11px] text-[#6B7280] font-medium">{durationMinutes} min</span>
+          <span className="text-[11px] text-[#64748B] font-semibold">{durationMinutes} min</span>
         </div>
       </div>
 
       {/* Time Slots Grid */}
       <div className="grid grid-cols-2 gap-2.5">
-        {allSlots.map((slot) => {
+        {allSlots.map((slot, index) => {
           const reserved = isReserved(slot);
           const blocked = isBlocked(slot);
           const selected = isSelected(slot);
@@ -168,24 +189,30 @@ export default function AvailabilityCalendar({
               onClick={() => available && onSlotSelect(slot)}
               disabled={!available}
               className={`
-                relative py-3.5 px-3 rounded-2xl font-medium text-sm transition-all duration-200
+                relative py-3.5 px-3 rounded-2xl font-medium text-sm transition-all duration-300
                 flex flex-col items-center justify-center gap-0.5
                 ${
                   selected
-                    ? 'bg-[#1FA3C8] text-white shadow-lg shadow-[#1FA3C8]/30 scale-[1.03]'
+                    ? 'bg-gradient-to-br from-[#1FA3C8] to-[#1889A8] text-white shadow-lg shadow-[#1FA3C8]/30 scale-[1.03]'
                     : reserved
-                    ? 'bg-[#F3F4F6] text-[#9CA3AF] cursor-not-allowed opacity-70'
+                    ? 'bg-[#F1F5F9] text-[#94A3B8] cursor-not-allowed opacity-60'
                     : blocked
-                    ? 'bg-[#fee2e2] text-[#ef4444] cursor-not-allowed opacity-70'
-                    : 'bg-white text-[#1F2937] border-2 border-[#1FA3C8] hover:shadow-md active:scale-[0.98]'
+                    ? 'bg-[#fee2e2] text-[#ef4444] cursor-not-allowed opacity-60'
+                    : 'bg-white text-[#0F172A] border-2 border-[#1FA3C8]/30 hover:border-[#1FA3C8] hover:shadow-md active:scale-[0.97]'
                 }
               `}
+              style={{ animationDelay: `${index * 0.03}s` }}
             >
-              <span className="font-semibold">{slot.startTime}</span>
-              <span className="text-[10px] opacity-70">{slot.endTime}</span>
+              <span className="font-bold text-base">{slot.startTime}</span>
+              <span className="text-[10px] opacity-60">{slot.endTime}</span>
               {!available && (
-                <span className="text-[9px] font-medium mt-0.5">
+                <span className="text-[9px] font-semibold mt-0.5 uppercase tracking-wide">
                   {reserved ? 'Ocupado' : 'Bloqueado'}
+                </span>
+              )}
+              {available && !selected && (
+                <span className="text-[9px] font-semibold mt-0.5 text-[#1FA3C8] uppercase tracking-wide">
+                  Libre
                 </span>
               )}
             </button>
@@ -194,11 +221,14 @@ export default function AvailabilityCalendar({
       </div>
 
       {availableSlots.length === 0 && (
-        <div className="text-center py-8">
-          <svg className="w-12 h-12 mx-auto text-[#9CA3AF] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-[#6B7280] text-sm">No hay horarios disponibles</p>
+        <div className="text-center py-8 animate-fade-in">
+          <div className="w-14 h-14 bg-[#F1F5F9] rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-7 h-7 text-[#94A3B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <p className="text-[#64748B] text-sm font-medium">No hay horarios disponibles</p>
+          <p className="text-[#94A3B8] text-xs mt-1">Intenta con otra fecha o cancha</p>
         </div>
       )}
     </div>

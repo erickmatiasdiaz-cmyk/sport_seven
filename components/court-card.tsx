@@ -27,69 +27,100 @@ export default function CourtCard({ court }: { court: Court }) {
     }).format(price);
   };
 
+  const getDurationLabel = () => {
+    if (court.allows60 && court.allows90) return '60 o 90 min';
+    if (court.allows90) return '90 min';
+    return '60 min';
+  };
+
   return (
-    <div className="bg-white rounded-3xl shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg">
-      {/* Decorative top line */}
-      <div className="h-1 w-full bg-gradient-to-r from-[#F7931E] to-[#1FA3C8]"></div>
-      
-      {/* Image section */}
-      <div className="relative h-48 overflow-hidden">
+    <div
+      className="court-card group cursor-pointer"
+      onClick={() => router.push(`/reservar?courtId=${court.id}`)}
+    >
+      {/* Image Section with Overlay */}
+      <div className="image-wrapper relative h-52">
         <Image
           src={court.image}
           alt={court.name}
           fill
-          sizes="(max-width: 768px) 100vw, 420px"
+          sizes="(max-width: 768px) 100vw, 480px"
           className="object-cover"
+          priority
         />
-        {/* Gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-        
-        {/* Badge - top right */}
-        <div className="absolute top-4 right-4 bg-[#F7931E] text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
-          Fútbol
+
+        {/* Floating badge top-right */}
+        <div className="absolute top-3.5 right-3.5 z-10">
+          <span className="inline-flex items-center gap-1.5 bg-white/95 backdrop-blur-sm text-[#0F172A] px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+            <svg className="w-3.5 h-3.5 text-[#22c55e]" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Disponible
+          </span>
+        </div>
+
+        {/* Type badge bottom-left over image */}
+        <div className="absolute bottom-3.5 left-3.5 z-10">
+          <span className="inline-flex items-center bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+            <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+            </svg>
+            {getDurationLabel()}
+          </span>
         </div>
       </div>
-      
-      {/* Content section */}
+
+      {/* Content Section */}
       <div className="p-5">
         {/* Court name */}
-        <h3 className="text-xl font-bold text-text-dark mb-1.5">{court.name}</h3>
-        
-        {/* Availability status */}
-        <p className="text-[#22c55e] text-sm font-medium mb-4 flex items-center gap-1.5">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          Cancha disponible para reserva inmediata
+        <h3 className="text-xl font-bold text-[#0F172A] mb-1 group-hover:text-[#F7931E] transition-colors duration-200">
+          {court.name}
+        </h3>
+
+        {/* Subtitle */}
+        <p className="text-[#64748B] text-sm mb-4">
+          Cancha de fútbol profesional · Iluminación LED
         </p>
-        
-        {/* Price and duration row */}
-        <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
-          {/* Price */}
+
+        {/* Price row */}
+        <div className="flex items-end justify-between mb-4">
           <div>
-            <p className="text-[#1FA3C8] font-bold text-2xl leading-tight">
+            <p className="text-[#64748B] text-xs font-medium mb-0.5">Desde</p>
+            <p className="text-[#F7931E] font-extrabold text-2xl leading-tight">
               {formatPrice(displayPrice)}
-              <span className="text-sm text-gray-500 font-normal">
+              <span className="text-sm text-[#94A3B8] font-normal">
                 /{displayDuration === 90 ? '90 min' : 'hora'}
               </span>
             </p>
           </div>
-          
-          {/* Duration */}
-          <div className="flex items-center text-text-medium text-sm font-medium">
-            <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-            </svg>
-            {displayDuration} min
+
+          {/* Features chips */}
+          <div className="flex gap-1.5">
+            {court.allows60 && (
+              <span className="bg-[#E8F7FB] text-[#1FA3C8] text-[10px] font-semibold px-2 py-1 rounded-full">
+                60 min
+              </span>
+            )}
+            {court.allows90 && (
+              <span className="bg-[#FFF3C4] text-[#B45309] text-[10px] font-semibold px-2 py-1 rounded-full">
+                90 min
+              </span>
+            )}
           </div>
         </div>
-        
-        {/* Reserve button - full width */}
+
+        {/* CTA Button */}
         <button
-          onClick={() => router.push(`/reservar?courtId=${court.id}`)}
-          className="w-full bg-[#F7931E] hover:bg-[#E07D0A] active:bg-[#E07D0A] text-white font-bold py-4 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] transform text-base"
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/reservar?courtId=${court.id}`);
+          }}
+          className="btn-primary w-full text-sm flex items-center justify-center gap-2"
         >
-          Reservar Ahora
+          Ver horarios
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>
