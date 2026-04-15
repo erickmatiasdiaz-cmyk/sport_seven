@@ -276,6 +276,16 @@ function AdminPage() {
               {tab.label}
             </button>
           ))}
+          <Link
+            href="/admin/configuracion"
+            className="flex-1 py-2.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 text-[#64748B] hover:bg-[#F1F5F9]"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317a1 1 0 011.35-.936l.972.486a1 1 0 00.894 0l.972-.486a1 1 0 011.35.936l.074 1.083a1 1 0 00.592.83l.998.43a1 1 0 01.548 1.274l-.36 1.024a1 1 0 00.214 1.022l.739.807a1 1 0 010 1.352l-.739.807a1 1 0 00-.214 1.022l.36 1.024a1 1 0 01-.548 1.274l-.998.43a1 1 0 00-.592.83l-.074 1.083a1 1 0 01-1.35.936l-.972-.486a1 1 0 00-.894 0l-.972.486a1 1 0 01-1.35-.936l-.074-1.083a1 1 0 00-.592-.83l-.998-.43a1 1 0 01-.548-1.274l.36-1.024a1 1 0 00-.214-1.022l-.739-.807a1 1 0 010-1.352l.739-.807a1 1 0 00.214-1.022l-.36-1.024a1 1 0 01.548-1.274l.998-.43a1 1 0 00.592-.83l.074-1.083z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+            Config
+          </Link>
         </div>
 
         {/* Tab Content */}
