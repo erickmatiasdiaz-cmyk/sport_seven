@@ -96,23 +96,23 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Metric Cards - SaaS Style */}
+      {/* Metric Cards - Premium Dark */}
       <section className="px-4 -mt-4 mb-6">
         <div className="grid grid-cols-3 gap-3">
           {/* Canchas */}
-          <div className="metric-card animate-fade-in-up">
-            <div className="metric-icon bg-gradient-to-br from-[#E8F7FB] to-[#D4F0F8]">
+          <div className="metric-card animate-fade-in-up group">
+            <div className="metric-icon bg-gradient-to-br from-[#1FA3C8]/20 to-[#1889A8]/20 border border-[#1FA3C8]/20">
               <svg className="w-6 h-6 text-[#1FA3C8]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
               </svg>
             </div>
-            <div className="metric-value">{courts.length}</div>
+            <div className="metric-value text-white">{courts.length}</div>
             <div className="metric-label">Canchas</div>
           </div>
 
           {/* Reserva Rápida */}
-          <div className="metric-card animate-fade-in-up">
-            <div className="metric-icon bg-gradient-to-br from-[#FFF3C4] to-[#FDE68A]">
+          <div className="metric-card animate-fade-in-up group">
+            <div className="metric-icon bg-gradient-to-br from-[#F7931E]/20 to-[#E07D0A]/20 border border-[#F7931E]/20">
               <svg className="w-6 h-6 text-[#F7931E]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 1.45-.39 2.81-1.06 3.98l1.46 1.46C21.41 15.89 22 14.02 22 12c0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V3.03c-4.06.5-7.18 3.91-7.18 8.03 0 4.51 3.66 8.17 8.18 8.17 1.85 0 3.55-.62 4.92-1.66l-1.46-1.46A4.952 4.952 0 0112 19z" />
                 <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
@@ -123,13 +123,13 @@ export default function Home() {
           </div>
 
           {/* Horarios */}
-          <div className="metric-card animate-fade-in-up">
-            <div className="metric-icon bg-gradient-to-br from-[#DCFCE7] to-[#BBF7D0]">
-              <svg className="w-6 h-6 text-[#22c55e]" fill="currentColor" viewBox="0 0 24 24">
+          <div className="metric-card animate-fade-in-up group">
+            <div className="metric-icon bg-gradient-to-br from-[#22c55e]/20 to-[#16a34a]/20 border border-[#22c55e]/20">
+              <svg className="w-6 h-6 text-[#4ade80]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
               </svg>
             </div>
-            <div className="metric-value">
+            <div className="metric-value text-white">
               {courts.length > 0
                 ? Math.max(
                     ...courts.map((court) => {
