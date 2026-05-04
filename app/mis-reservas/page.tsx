@@ -65,7 +65,7 @@ function MyReservationsContent() {
         return;
       }
 
-      const res = await fetch(`/api/reservations?userId=${user.id}&userRole=${user.role}`);
+      const res = await fetch('/api/reservations');
       if (!res.ok) throw new Error('Error');
       const data = await res.json();
       setReservations(data);
@@ -93,7 +93,7 @@ function MyReservationsContent() {
       const res = await fetch('/api/reservations', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: 'cancelled', userId: user.id, userRole: user.role }),
+        body: JSON.stringify({ id, status: 'cancelled' }),
       });
 
       if (!res.ok) {

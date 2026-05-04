@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
-import { isAdminRequest } from '@/lib/auth';
+import { authErrorResponse, getCurrentUser, requireAdmin } from '@/lib/auth';
 
 // GET - List all courts (only active ones for non-admin)
 export async function GET(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
-    const isAdmin = isAdminRequest(request);
+    const isAdmin = getCurrentUser(request)?.role === 'admin';
 
     const where: any = {};
     
@@ -39,12 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!isAdminRequest(request, body)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
-    }
+    requireAdmin(request);
 
     const {
       name,
@@ -102,6 +97,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(court, { status: 201 });
   } catch (error: any) {
+    const authError = authErrorResponse(error);
+    if (authError) return authError;
+
     return NextResponse.json(
       { error: error.message || 'Error al crear la cancha' },
       { status: 500 }
@@ -114,14 +112,9 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!isAdminRequest(request, body)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
-    }
+    requireAdmin(request);
 
-    const { id, userRole, ...data } = body;
+    const { id, ...data } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -168,6 +161,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updated);
   } catch (error: any) {
+    const authError = authErrorResponse(error);
+    if (authError) return authError;
+
     return NextResponse.json(
       { error: error.message || 'Error al actualizar la cancha' },
       { status: 500 }
@@ -178,12 +174,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete court (admin only)
 export async function DELETE(request: NextRequest) {
   try {
-    if (!isAdminRequest(request)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
-    }
+    requireAdmin(request);
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -212,6 +203,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    const authError = authErrorResponse(error);
+    if (authError) return authError;
+
     return NextResponse.json(
       { error: error.message || 'Error al eliminar la cancha' },
       { status: 500 }

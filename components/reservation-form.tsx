@@ -15,8 +15,6 @@ interface ReservationFormProps {
   selectedDate: string;
   selectedSlot: TimeSlot;
   durationMinutes?: number;
-  userId: string;
-  userRole: string;
 }
 
 export default function ReservationForm({
@@ -25,8 +23,6 @@ export default function ReservationForm({
   selectedDate,
   selectedSlot,
   durationMinutes = 60,
-  userId,
-  userRole,
 }: ReservationFormProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -71,8 +67,6 @@ export default function ReservationForm({
           startTime: selectedSlot.startTime,
           endTime: selectedSlot.endTime,
           durationMinutes,
-          userId,
-          userRole,
           status: 'confirmed',
         }),
       });

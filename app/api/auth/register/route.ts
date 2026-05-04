@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, comparePassword, createSession } from '@/lib/auth';
+import { hashPassword, setSessionCookie } from '@/lib/auth';
 
 // POST /api/auth/register
 export async function POST(request: NextRequest) {
@@ -55,13 +55,10 @@ export async function POST(request: NextRequest) {
       phone: user.phone ?? undefined,
     };
 
-    // Create session
-    const sessionId = createSession(userSession);
+    const response = NextResponse.json({ user: userSession }, { status: 201 });
+    setSessionCookie(response, userSession);
 
-    return NextResponse.json(
-      { user, sessionId },
-      { status: 201 }
-    );
+    return response;
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al registrar usuario' },

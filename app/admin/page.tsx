@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth-guard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -83,14 +83,9 @@ function AdminPage() {
 
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const adminHeaders = useMemo(
-    () => (user?.role === 'admin' ? { 'x-user-role': user.role } : undefined),
-    [user?.role]
-  );
-
   const fetchCourts = useCallback(async () => {
     try {
-      const res = await fetch('/api/courts', { headers: adminHeaders });
+      const res = await fetch('/api/courts');
       const data = await res.json();
       setCourts(data);
       if (data.length > 0) {
@@ -100,15 +95,15 @@ function AdminPage() {
     } catch (error) {
       console.error('Error fetching courts:', error);
     }
-  }, [adminHeaders]);
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [resRes, resBlocked, resUsers] = await Promise.all([
-        fetch(`/api/reservations?date=${selectedDate}&userId=${user?.id}&userRole=${user?.role}`, { headers: adminHeaders }),
-        fetch(`/api/blocked-slots?date=${selectedDate}`, { headers: adminHeaders }),
-        fetch('/api/users', { headers: adminHeaders }),
+        fetch(`/api/reservations?date=${selectedDate}`),
+        fetch(`/api/blocked-slots?date=${selectedDate}`),
+        fetch('/api/users'),
       ]);
       setReservations(await resRes.json());
       setBlockedSlots(await resBlocked.json());
@@ -118,7 +113,7 @@ function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [adminHeaders, selectedDate, user?.id, user?.role]);
+  }, [selectedDate]);
 
   useEffect(() => { fetchCourts(); }, [fetchCourts]);
   useEffect(() => { if (selectedDate) fetchData(); }, [fetchData, selectedDate]);
@@ -130,7 +125,7 @@ function AdminPage() {
       const res = await fetch('/api/reservations', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: 'cancelled', userId: user?.id, userRole: user?.role }),
+        body: JSON.stringify({ id, status: 'cancelled' }),
       });
       if (!res.ok) throw new Error('Error');
       fetchData();
@@ -144,7 +139,7 @@ function AdminPage() {
   const handleUnblockSlot = async (id: string) => {
     if (!confirm('¿Desbloquear este horario?')) return;
     try {
-      const res = await fetch(`/api/blocked-slots?id=${id}`, { method: 'DELETE', headers: adminHeaders });
+      const res = await fetch(`/api/blocked-slots?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Error');
       fetchData();
     } catch {
@@ -158,7 +153,7 @@ function AdminPage() {
       const res = await fetch('/api/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newReservation, status: 'confirmed', userId: user?.id, userRole: user?.role }),
+        body: JSON.stringify({ ...newReservation, status: 'confirmed' }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -177,8 +172,8 @@ function AdminPage() {
     try {
       const res = await fetch('/api/blocked-slots', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(adminHeaders ?? {}) },
-        body: JSON.stringify({ ...blockSlot, userRole: user?.role }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(blockSlot),
       });
       if (!res.ok) {
         const data = await res.json();

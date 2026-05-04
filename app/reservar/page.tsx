@@ -306,8 +306,6 @@ function ReservationPageContent() {
               selectedDate={selectedDate}
               selectedSlot={selectedSlot}
               durationMinutes={duration}
-              userId={user!.id}
-              userRole={user!.role}
             />
           </section>
         )}

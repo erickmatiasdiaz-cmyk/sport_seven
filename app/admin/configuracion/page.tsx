@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth-guard';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface Court {
   id: string;
@@ -20,7 +19,6 @@ interface Court {
 }
 
 function CourtConfigPage() {
-  const { user } = useAuth();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -39,17 +37,10 @@ function CourtConfigPage() {
     isActive: true,
   });
 
-  const adminHeaders = useMemo(
-    () => (user?.role === 'admin' ? { 'x-user-role': user.role } : undefined),
-    [user?.role]
-  );
-
   const fetchCourts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/courts?includeInactive=true', {
-        headers: adminHeaders,
-      });
+      const res = await fetch('/api/courts?includeInactive=true');
       const data = await res.json();
       setCourts(data);
     } catch (error) {
@@ -57,7 +48,7 @@ function CourtConfigPage() {
     } finally {
       setLoading(false);
     }
-  }, [adminHeaders]);
+  }, []);
 
   useEffect(() => {
     fetchCourts();
@@ -112,9 +103,8 @@ function CourtConfigPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          ...(adminHeaders ?? {}),
         },
-        body: JSON.stringify({ ...body, userRole: user?.role }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -138,9 +128,8 @@ function CourtConfigPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(adminHeaders ?? {}),
         },
-        body: JSON.stringify({ id: court.id, isActive: !court.isActive, userRole: user?.role }),
+        body: JSON.stringify({ id: court.id, isActive: !court.isActive }),
       });
 
       if (!res.ok) throw new Error('Error');
@@ -156,7 +145,6 @@ function CourtConfigPage() {
     try {
       const res = await fetch(`/api/courts?id=${courtId}`, {
         method: 'DELETE',
-        headers: adminHeaders,
       });
 
       if (!res.ok) throw new Error('Error');

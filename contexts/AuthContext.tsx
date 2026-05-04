@@ -3,9 +3,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
-const SESSION_STORAGE_KEY = 'sportseven_session';
-const SESSION_EVENT_NAME = 'sportseven-auth-changed';
-
 export interface User {
   id: string;
   name: string;
@@ -19,9 +16,10 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, password: string, phone?: string) => Promise<User>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAdmin: boolean;
   isAuthenticated: boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,44 +29,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing session on mount
-  useEffect(() => {
-    const syncUserFromStorage = () => {
-      const stored = localStorage.getItem(SESSION_STORAGE_KEY);
-      if (!stored) {
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/me', { cache: 'no-store' });
+      if (!res.ok) {
         setUser(null);
         return;
       }
 
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(SESSION_STORAGE_KEY);
-        setUser(null);
-      }
-    };
-
-    syncUserFromStorage();
-
-    const handleStorage = (event: StorageEvent) => {
-      if (!event.key || event.key === SESSION_STORAGE_KEY) {
-        syncUserFromStorage();
-      }
-    };
-
-    const handleAuthChanged = () => {
-      syncUserFromStorage();
-    };
-
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener(SESSION_EVENT_NAME, handleAuthChanged);
-    setLoading(false);
-
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener(SESSION_EVENT_NAME, handleAuthChanged);
-    };
+      const data = await res.json();
+      setUser(data.user);
+    } catch {
+      setUser(null);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshUser().finally(() => setLoading(false));
+  }, [refreshUser]);
 
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     const res = await fetch('/api/auth/login', {
@@ -80,12 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || 'Error al iniciar sesión');
+      throw new Error(data.error || 'Error al iniciar sesion');
     }
 
     setUser(data.user);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
-    window.dispatchEvent(new Event(SESSION_EVENT_NAME));
     return data.user;
   }, []);
 
@@ -103,16 +79,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setUser(data.user);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
-    window.dispatchEvent(new Event(SESSION_EVENT_NAME));
     return data.user;
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
     setUser(null);
-    localStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem('userPhone');
-    window.dispatchEvent(new Event(SESSION_EVENT_NAME));
     router.replace('/login');
     router.refresh();
   }, [router]);
@@ -121,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin, isAuthenticated, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

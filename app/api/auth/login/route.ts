@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
-import { comparePassword, createSession } from '@/lib/auth';
+import { comparePassword, setSessionCookie } from '@/lib/auth';
 
 // POST /api/auth/login
 export async function POST(request: NextRequest) {
@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create session
     const userSession = {
       id: user.id,
       name: user.name,
@@ -50,12 +49,12 @@ export async function POST(request: NextRequest) {
       role: user.role,
     };
 
-    const sessionId = createSession(userSession);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: userSession,
-      sessionId,
     });
+    setSessionCookie(response, userSession);
+
+    return response;
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al iniciar sesión' },
