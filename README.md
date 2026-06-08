@@ -24,6 +24,8 @@ BOOTSTRAP_ADMIN_PASSWORD=""
 NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
 MERCADOPAGO_ACCESS_TOKEN="APP_USR-o-TEST-token"
 MERCADOPAGO_WEBHOOK_SECRET="clave-secreta-webhook"
+MERCADOPAGO_SANDBOX="false"
+MERCADOPAGO_TEST_PAYER_EMAIL=""
 PAYMENT_MODE="full"
 RESERVATION_DEPOSIT_AMOUNT="5000"
 PAYMENT_HOLD_MINUTES="5"
@@ -89,6 +91,8 @@ https://tu-dominio.vercel.app/api/payments/mercadopago/webhook
 ```
 
 Si `PAYMENT_MODE=full`, se cobra el precio completo de la cancha. Si `PAYMENT_MODE=deposit`, se cobra el monto fijo de `RESERVATION_DEPOSIT_AMOUNT`.
+
+Para pruebas demo con Mercado Pago, configura `MERCADOPAGO_SANDBOX="true"` y, si usas una cuenta compradora de prueba, define `MERCADOPAGO_TEST_PAYER_EMAIL` con el email de esa cuenta.
 
 ## Acceso
 

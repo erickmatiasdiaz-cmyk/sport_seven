@@ -95,6 +95,14 @@ export async function createMercadoPagoPreference({
   };
 }
 
+export function getMercadoPagoCheckoutUrl(preference: { init_point?: string; sandbox_init_point?: string }) {
+  if (process.env.MERCADOPAGO_SANDBOX === 'true') {
+    return preference.sandbox_init_point || preference.init_point;
+  }
+
+  return preference.init_point || preference.sandbox_init_point;
+}
+
 export async function getMercadoPagoPayment(paymentId: string) {
   const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
     headers: {

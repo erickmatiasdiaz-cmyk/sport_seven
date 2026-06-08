@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
-import { createMercadoPagoPreference, getReservationPaymentAmount } from '@/lib/mercadopago';
+import {
+  createMercadoPagoPreference,
+  getMercadoPagoCheckoutUrl,
+  getReservationPaymentAmount,
+} from '@/lib/mercadopago';
 
 function getAppUrl(request: NextRequest) {
   const configuredUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -64,14 +68,14 @@ export async function POST(request: NextRequest) {
     const title = `${reservation.court.name} ${reservation.date} ${reservation.startTime}`;
     const preference = await createMercadoPagoPreference({
       reservationId: reservation.id,
-      payerEmail: user.email,
+      payerEmail: process.env.MERCADOPAGO_TEST_PAYER_EMAIL || user.email,
       payerName: reservation.customerName,
       amount,
       title,
       appUrl: getAppUrl(request),
     });
 
-    const checkoutUrl = preference.init_point || preference.sandbox_init_point;
+    const checkoutUrl = getMercadoPagoCheckoutUrl(preference);
     if (!checkoutUrl) {
       return NextResponse.json(
         { error: 'Mercado Pago no entrego URL de checkout' },
