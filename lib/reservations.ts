@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 
-const DEFAULT_PAYMENT_HOLD_MINUTES = 15;
+const DEFAULT_PAYMENT_HOLD_MINUTES = 5;
 
 export function getPaymentHoldMinutes() {
   const configured = Number(process.env.PAYMENT_HOLD_MINUTES || DEFAULT_PAYMENT_HOLD_MINUTES);

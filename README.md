@@ -26,7 +26,7 @@ MERCADOPAGO_ACCESS_TOKEN="APP_USR-o-TEST-token"
 MERCADOPAGO_WEBHOOK_SECRET="clave-secreta-webhook"
 PAYMENT_MODE="full"
 RESERVATION_DEPOSIT_AMOUNT="5000"
-PAYMENT_HOLD_MINUTES="15"
+PAYMENT_HOLD_MINUTES="5"
 ```
 
 Reemplaza `PASSWORD` por la contrasena real de la base de datos de Supabase.

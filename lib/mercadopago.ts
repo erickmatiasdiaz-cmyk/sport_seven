@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { getPaymentHoldMinutes } from '@/lib/reservations';
 
 interface PreferenceItem {
   title: string;
@@ -77,7 +78,7 @@ export async function createMercadoPagoPreference({
       },
       auto_return: 'approved',
       expires: true,
-      expiration_date_to: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+      expiration_date_to: new Date(Date.now() + getPaymentHoldMinutes() * 60 * 1000).toISOString(),
     }),
   });
 
