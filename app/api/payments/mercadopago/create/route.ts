@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/auth';
+import { requireUser } from '@/lib/auth';
 import {
   createMercadoPagoPreference,
   getMercadoPagoCheckoutUrl,
@@ -16,7 +16,7 @@ function getAppUrl(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, response } = await requireAdmin(request);
+    const { user, response } = await requireUser(request);
     if (response) return response;
 
     const { reservationId } = await request.json();

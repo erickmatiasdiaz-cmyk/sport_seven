@@ -323,7 +323,7 @@ function ReservationPageContent() {
 
 export default function ReservationPage() {
   return (
-    <AuthGuard requireAuth={true} requireAdmin={true}>
+    <AuthGuard requireAuth={true}>
       <Suspense fallback={
         <main className="page-content flex justify-center items-center min-h-screen">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#F7931E]"></div>

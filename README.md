@@ -19,6 +19,7 @@ El proyecto esta conectado al proyecto Supabase `sport_seven`:
 DATABASE_URL="postgresql://postgres:PASSWORD@db.krxawudnypjazsqwswel.supabase.co:5432/postgres?schema=public"
 AUTH_SECRET="un-secreto-largo-y-aleatorio"
 ENABLE_BOOTSTRAP_DATA="false"
+ENABLE_PUBLIC_REGISTRATION="true"
 BOOTSTRAP_ADMIN_EMAIL=""
 BOOTSTRAP_ADMIN_PASSWORD=""
 NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
@@ -73,6 +74,7 @@ npx prisma db seed
 - La base bloquea reservas solapadas por cancha, fecha y horario.
 - Mercado Pago Checkout Pro confirma reservas solo cuando el webhook informa pago aprobado.
 - `ENABLE_BOOTSTRAP_DATA` debe permanecer en `false` en produccion.
+- `ENABLE_PUBLIC_REGISTRATION` permite que clientes creen cuenta desde el login; las pantallas admin siguen protegidas por rol.
 
 ## Mercado Pago
 

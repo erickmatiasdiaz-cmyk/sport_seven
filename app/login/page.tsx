@@ -61,6 +61,10 @@ export default function LoginPage() {
       {/* Form Card */}
       <div className="flex-1 px-4 -mt-4">
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#E2E8F0] animate-slide-down">
+          <div className="mb-5 rounded-2xl bg-[#F8FAFC] p-3 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#94A3B8]">Acceso Sport Seven</p>
+            <p className="mt-1 text-sm text-[#475569]">Entra o crea una cuenta para reservar horarios.</p>
+          </div>
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 p-3.5 rounded-2xl text-sm mb-5 flex items-start gap-3 animate-fade-in">
@@ -138,7 +142,10 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-5 border-t border-[#E2E8F0] text-center">
             <p className="text-[#64748B] text-sm">
-              Acceso exclusivo para administradores.
+              No tienes cuenta?{' '}
+              <Link href="/registro" className="font-bold text-[#F7931E]">
+                Crear usuario
+              </Link>
             </p>
           </div>
         </div>

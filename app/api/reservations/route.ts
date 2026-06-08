@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isSlotAvailable } from '@/lib/availability';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdmin, requireUser } from '@/lib/auth';
 import { expireStalePendingPayments } from '@/lib/reservations';
 
 function isValidStatus(status: unknown) {
@@ -42,7 +42,7 @@ function isReservationConflict(error: any) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { response } = await requireAdmin(request);
+    const { user, response } = await requireUser(request);
     if (response) return response;
     await expireStalePendingPayments();
 
@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
 
     if (date) where.date = date;
     if (courtId) where.courtId = courtId;
+    if (user?.role !== 'admin') where.userId = user?.id;
 
     const reservations = await prisma.reservation.findMany({
       where,
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, response } = await requireAdmin(request);
+    const { user, response } = await requireUser(request);
     if (response) return response;
     await expireStalePendingPayments();
 
@@ -181,7 +182,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { response } = await requireAdmin(request);
+    const { user, response } = await requireUser(request);
     if (response) return response;
 
     const body = await request.json();
@@ -202,6 +203,13 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         { error: 'Reserva no encontrada' },
         { status: 404 }
+      );
+    }
+
+    if (user?.role !== 'admin' && reservation.userId !== user?.id) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 403 }
       );
     }
 

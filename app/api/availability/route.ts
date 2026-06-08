@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { getAvailableSlots } from '@/lib/availability';
-import { requireAdmin } from '@/lib/auth';
+import { requireUser } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const { response } = await requireAdmin(request);
+    const { response } = await requireUser(request);
     if (response) return response;
 
     await ensureBootstrapData();

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdmin, requireUser } from '@/lib/auth';
 
 // GET - List all courts (only active ones for non-admin)
 export async function GET(request: NextRequest) {
@@ -10,13 +10,13 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
-    const { response } = await requireAdmin(request);
+    const { user, response } = await requireUser(request);
     if (response) return response;
 
     const where: any = {};
     
-    // Only include inactive if user is admin and requested it
-    if (!includeInactive) {
+    // Only admins can request inactive courts.
+    if (!includeInactive || user?.role !== 'admin') {
       where.isActive = true;
     }
 
