@@ -308,7 +308,7 @@ function MyReservationsContent() {
         {inProgress ? (
           <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2.5">
             <p className="text-xs font-semibold text-blue-700 flex items-center gap-2">
-              <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+              <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse flex-shrink-0"></span>
               En curso ahora
             </p>
           </div>
@@ -424,7 +424,7 @@ function MyReservationsContent() {
         </div>
       )}
 
-      <div className="px-4 -mt-3 space-y-6">
+      <div className="px-4 pt-5 space-y-7">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -456,12 +456,12 @@ function MyReservationsContent() {
             {/* Today's Reservations */}
             {todayReservations.length > 0 && (
               <section className="animate-fade-in-up">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between gap-3 mb-3 rounded-2xl bg-white/80 px-3 py-2 shadow-sm ring-1 ring-[#E2E8F0]">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse flex-shrink-0"></div>
                     <h2 className="text-base font-bold text-[#0F172A]">Hoy</h2>
                   </div>
-                  <span className="text-xs font-semibold text-[#1FA3C8] bg-[#E8F7FB] px-2.5 py-1 rounded-full">
+                  <span className="flex-shrink-0 text-xs font-semibold text-[#1FA3C8] bg-[#E8F7FB] px-2.5 py-1 rounded-full">
                     {todayReservations.length}
                   </span>
                 </div>
@@ -476,12 +476,12 @@ function MyReservationsContent() {
             {/* Upcoming Reservations */}
             {pendingPaymentReservations.length > 0 && (
               <section className="animate-fade-in-up">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between gap-3 mb-3 rounded-2xl bg-white/80 px-3 py-2 shadow-sm ring-1 ring-[#E2E8F0]">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
                     <h2 className="text-base font-bold text-[#0F172A]">Pendientes de pago</h2>
                   </div>
-                  <span className="text-xs font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full">
+                  <span className="flex-shrink-0 text-xs font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full">
                     {pendingPaymentReservations.length}
                   </span>
                 </div>
@@ -496,12 +496,12 @@ function MyReservationsContent() {
             {/* Upcoming Reservations */}
             {upcomingReservations.length > 0 && (
               <section className="animate-fade-in-up">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between gap-3 mb-3 rounded-2xl bg-white/80 px-3 py-2 shadow-sm ring-1 ring-[#E2E8F0]">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
                     <h2 className="text-base font-bold text-[#0F172A]">Próximas</h2>
                   </div>
-                  <span className="text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                  <span className="flex-shrink-0 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
                     {upcomingReservations.length}
                   </span>
                 </div>
@@ -516,12 +516,12 @@ function MyReservationsContent() {
             {/* History */}
             {historyReservations.length > 0 && (
               <section className="animate-fade-in-up">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between gap-3 mb-3 rounded-2xl bg-white/80 px-3 py-2 shadow-sm ring-1 ring-[#E2E8F0]">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-[#94A3B8] rounded-full"></div>
+                    <div className="w-2 h-2 bg-[#94A3B8] rounded-full flex-shrink-0"></div>
                     <h2 className="text-base font-bold text-[#0F172A]">Historial</h2>
                   </div>
-                  <span className="text-xs font-semibold text-[#64748B] bg-[#F1F5F9] px-2.5 py-1 rounded-full">
+                  <span className="flex-shrink-0 text-xs font-semibold text-[#64748B] bg-[#F1F5F9] px-2.5 py-1 rounded-full">
                     {historyReservations.length}
                   </span>
                 </div>
@@ -554,3 +554,4 @@ export default function MyReservationsPage() {
     </AuthGuard>
   );
 }
+
