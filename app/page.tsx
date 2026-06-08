@@ -45,39 +45,58 @@ function HomeContent() {
   return (
     <main className="page-content bg-[#F8FAFC] min-h-screen">
       <header className="premium-top-gradient">
-        <div className="relative header-container px-5 pt-6 pb-5">
+        <div className="relative header-container px-5 pt-6 pb-9">
           <div className="flex items-center justify-between mb-4">
             <p className="text-white/90 text-sm font-medium">
               Hola, {user?.name.split(' ')[0] || 'bienvenido'}
             </p>
-            <Link
-              href="/reservar"
-              className="bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-white/25"
-            >
-              Ver horarios
-            </Link>
+            {user ? (
+              <Link
+                href="/reservar"
+                className="bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-white/25"
+              >
+                Ver horarios
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-white text-[#0F172A] px-3.5 py-1.5 rounded-full text-xs font-bold transition-all"
+              >
+                Ingresar
+              </Link>
+            )}
           </div>
 
-          <div className="mb-4">
+          <div className="mb-5">
             <p className="text-white/60 text-xs font-semibold uppercase tracking-[0.2em]">Sport Seven</p>
-            <h1 className="mt-2 text-2xl font-extrabold text-white leading-tight">
-              Reserva tu cancha<br />en segundos
+            <h1 className="mt-2 text-3xl font-extrabold text-white leading-tight">
+              Reserva tu cancha<br />sin llamadas
             </h1>
             <p className="text-white/80 text-sm mt-1 font-medium">
-              Horarios en tiempo real, pagos online y gestion de reservas.
+              Revisa disponibilidad real, elige horario y paga online cuando quieras.
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-3.5 py-2 rounded-full border border-white/25">
-            <div className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></div>
-            <span className="text-white text-xs font-semibold">
-              Abierto hoy {sharedOpeningTime} - {sharedClosingTime}
-            </span>
+          <div className="flex flex-col gap-3">
+            <div className="inline-flex w-fit items-center gap-2 bg-white/15 backdrop-blur-sm px-3.5 py-2 rounded-full border border-white/25">
+              <div className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></div>
+              <span className="text-white text-xs font-semibold">
+                Abierto hoy {sharedOpeningTime} - {sharedClosingTime}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/reservar" className="rounded-2xl bg-[#F7931E] px-4 py-3 text-center text-sm font-extrabold text-white shadow-lg shadow-orange-900/20">
+                Reservar ahora
+              </Link>
+              <Link href={user ? '/mis-reservas' : '/registro'} className="rounded-2xl bg-white/12 px-4 py-3 text-center text-sm font-bold text-white ring-1 ring-white/20">
+                {user ? 'Mis reservas' : 'Crear cuenta'}
+              </Link>
+            </div>
           </div>
         </div>
       </header>
 
-      <section className="px-4 -mt-4 mb-6">
+      <section className="px-4 -mt-6 mb-6">
         <div className="grid grid-cols-3 gap-3">
           <div className="metric-card animate-fade-in-up">
             <div className="metric-icon bg-gradient-to-br from-[#E8F7FB] to-[#D4F0F8]">
@@ -125,8 +144,8 @@ function HomeContent() {
       <section className="px-4">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A]">Canchas disponibles</h2>
-            <p className="text-[#64748B] text-sm">Selecciona una cancha y revisa sus horarios</p>
+            <h2 className="text-lg font-bold text-[#0F172A]">Elige tu cancha</h2>
+            <p className="text-[#64748B] text-sm">Fotos, precios y horarios disponibles</p>
           </div>
         </div>
 

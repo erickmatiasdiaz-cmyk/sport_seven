@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth-guard';
 
@@ -24,6 +25,7 @@ function CourtConfigPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingCourt, setEditingCourt] = useState<Court | null>(null);
   const [saving, setSaving] = useState(false);
+  const [processingImage, setProcessingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -120,6 +122,50 @@ function CourtConfigPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleImageUpload = (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Selecciona una imagen valida');
+      return;
+    }
+
+    setProcessingImage(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new window.Image();
+      image.onload = () => {
+        const maxWidth = 1200;
+        const scale = Math.min(1, maxWidth / image.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(image.width * scale);
+        canvas.height = Math.round(image.height * scale);
+
+        const context = canvas.getContext('2d');
+        if (!context) {
+          setProcessingImage(false);
+          return;
+        }
+
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        setFormData((current) => ({
+          ...current,
+          image: canvas.toDataURL('image/jpeg', 0.82),
+        }));
+        setProcessingImage(false);
+      };
+      image.onerror = () => {
+        setProcessingImage(false);
+        alert('No se pudo procesar la imagen');
+      };
+      image.src = String(reader.result);
+    };
+    reader.onerror = () => {
+      setProcessingImage(false);
+      alert('No se pudo leer la imagen');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleToggleActive = async (court: Court) => {
@@ -254,6 +300,56 @@ function CourtConfigPage() {
                   placeholder="Ej: Cancha Fútbol 3"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-dark mb-1.5">
+                  Foto de la cancha
+                </label>
+                <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                  {formData.image ? (
+                    <div className="relative h-40 w-full overflow-hidden rounded-xl">
+                      <Image
+                        src={formData.image}
+                        alt="Vista previa de cancha"
+                        fill
+                        sizes="420px"
+                        className="object-cover"
+                        unoptimized={formData.image.startsWith('data:')}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-40 items-center justify-center rounded-xl bg-white text-sm font-semibold text-[#94A3B8]">
+                      Sin foto cargada
+                    </div>
+                  )}
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <label className="cursor-pointer rounded-xl bg-[#0F172A] px-3 py-2.5 text-center text-xs font-bold text-white">
+                      {processingImage ? 'Procesando...' : 'Subir foto'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => handleImageUpload(event.target.files?.[0])}
+                        disabled={processingImage}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, image: '' })}
+                      className="rounded-xl bg-white px-3 py-2.5 text-xs font-bold text-[#64748B] ring-1 ring-[#E2E8F0]"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                  <input
+                    type="url"
+                    value={formData.image.startsWith('data:') ? '' : formData.image}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    className="mt-3 w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm"
+                    placeholder="O pega una URL de imagen"
+                  />
+                </div>
               </div>
 
               {/* Price 60 and 90 */}
@@ -399,7 +495,17 @@ function CourtConfigPage() {
             <div className="space-y-3">
               {courts.map((court) => (
                 <div key={court.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-[#F1F5F9]">
+                      <Image
+                        src={court.image}
+                        alt={court.name}
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                        unoptimized={court.image.startsWith('data:')}
+                      />
+                    </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-bold text-text-dark">{court.name}</h3>

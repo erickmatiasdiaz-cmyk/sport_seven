@@ -15,6 +15,7 @@ interface Court {
 
 export default function CourtCard({ court }: { court: Court }) {
   const router = useRouter();
+  const isInlineImage = court.image.startsWith('data:');
 
   const displayDuration = !court.allows60 && court.allows90 ? 90 : 60;
   const displayPrice = displayDuration === 90 ? court.price90 : court.price60;
@@ -45,8 +46,9 @@ export default function CourtCard({ court }: { court: Court }) {
           alt={court.name}
           fill
           sizes="(max-width: 768px) 100vw, 480px"
-          className="object-cover"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           priority
+          unoptimized={isInlineImage}
         />
 
         {/* Floating badge top-right */}
