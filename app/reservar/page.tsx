@@ -23,6 +23,13 @@ interface TimeSlot {
   endTime: string;
 }
 
+function formatLocalDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function ReservationPageContent() {
   const searchParams = useSearchParams();
   const courtIdParam = searchParams.get('courtId');
@@ -62,7 +69,7 @@ function ReservationPageContent() {
 
   useEffect(() => {
     const today = new Date();
-    setSelectedDate(today.toISOString().split('T')[0]);
+    setSelectedDate(formatLocalDate(today));
   }, []);
 
   const getNextDays = () => {
@@ -71,7 +78,7 @@ function ReservationPageContent() {
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatLocalDate(date);
       const dayName = date.toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', '');
       const dayNum = date.getDate();
       days.push({ date: dateStr, label: dateStr, dayName, dayNum });

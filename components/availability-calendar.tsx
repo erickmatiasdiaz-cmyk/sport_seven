@@ -27,8 +27,29 @@ interface AvailabilityCalendarProps {
   courtId: string;
   selectedDate: string;
   selectedSlot: TimeSlot | null;
-  onSlotSelect: (slot: TimeSlot) => void;
+  onSlotSelect: (slot: TimeSlot | null) => void;
   durationMinutes?: 60 | 90;
+}
+
+function getTodayDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function timeToMinutes(time: string) {
+  const [hour, minute] = time.split(':').map(Number);
+  return hour * 60 + minute;
+}
+
+function isPastSlot(selectedDate: string, startTime: string) {
+  const today = getTodayDate();
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  return selectedDate < today || (selectedDate === today && timeToMinutes(startTime) <= nowMinutes);
 }
 
 export default function AvailabilityCalendar({
@@ -68,6 +89,18 @@ export default function AvailabilityCalendar({
 
     fetchAvailability();
   }, [courtId, selectedDate, durationMinutes]);
+
+  useEffect(() => {
+    if (!selectedSlot) return;
+
+    const stillAvailable = availableSlots.some(
+      (slot) => slot.startTime === selectedSlot.startTime && slot.endTime === selectedSlot.endTime
+    );
+
+    if (!stillAvailable || isPastSlot(selectedDate, selectedSlot.startTime)) {
+      onSlotSelect(null);
+    }
+  }, [availableSlots, onSlotSelect, selectedDate, selectedSlot]);
 
   // Use availableSlots from API and merge with reserved/blocked for display
   const allSlots: TimeSlot[] = [];
@@ -182,18 +215,21 @@ export default function AvailabilityCalendar({
           const blocked = isBlocked(slot);
           const selected = isSelected(slot);
           const available = isAvailable(slot);
+          const past = isPastSlot(selectedDate, slot.startTime);
 
           return (
             <button
               key={slot.startTime}
-              onClick={() => available && onSlotSelect(slot)}
-              disabled={!available}
+              onClick={() => available && !past && onSlotSelect(slot)}
+              disabled={!available || past}
               className={`
                 relative py-3.5 px-3 rounded-2xl font-medium text-sm transition-all duration-300
                 flex flex-col items-center justify-center gap-0.5
                 ${
                   selected
                     ? 'bg-gradient-to-br from-[#1FA3C8] to-[#1889A8] text-white shadow-lg shadow-[#1FA3C8]/30 scale-[1.03]'
+                    : past
+                    ? 'bg-[#F8FAFC] text-[#CBD5E1] cursor-not-allowed border border-[#E2E8F0]'
                     : reserved
                     ? 'bg-[#F1F5F9] text-[#94A3B8] cursor-not-allowed opacity-60'
                     : blocked
@@ -205,12 +241,16 @@ export default function AvailabilityCalendar({
             >
               <span className="font-bold text-base">{slot.startTime}</span>
               <span className="text-[10px] opacity-60">{slot.endTime}</span>
-              {!available && (
+              {past ? (
+                <span className="text-[9px] font-semibold mt-0.5 uppercase tracking-wide">
+                  Pasado
+                </span>
+              ) : !available && (
                 <span className="text-[9px] font-semibold mt-0.5 uppercase tracking-wide">
                   {reserved ? 'Ocupado' : 'Bloqueado'}
                 </span>
               )}
-              {available && !selected && (
+              {available && !selected && !past && (
                 <span className="text-[9px] font-semibold mt-0.5 text-[#1FA3C8] uppercase tracking-wide">
                   Libre
                 </span>

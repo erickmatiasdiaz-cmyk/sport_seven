@@ -1,6 +1,37 @@
 import { prisma } from './prisma';
 import { expireStalePendingPayments, getPaymentHoldExpirationDate } from '@/lib/reservations';
 
+const APP_TIME_ZONE = 'America/Santiago';
+
+function getCurrentDateTimeInAppTimeZone() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: APP_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    minutes: Number(values.hour) * 60 + Number(values.minute),
+  };
+}
+
+function timeToMinutes(time: string) {
+  const [hour, minute] = time.split(':').map(Number);
+  return hour * 60 + minute;
+}
+
+export function isPastSlot(date: string, startTime: string) {
+  const now = getCurrentDateTimeInAppTimeZone();
+  return date < now.date || (date === now.date && timeToMinutes(startTime) <= now.minutes);
+}
+
 // Generate time slots for a court based on its configuration
 function generateTimeSlotsForCourt(
   openingTime: string,
@@ -100,7 +131,7 @@ export async function getAvailableSlots(
       reservations.some((r) => slot.startTime < r.endTime && slot.endTime > r.startTime) ||
       blockedSlots.some((b) => slot.startTime < b.endTime && slot.endTime > b.startTime);
     
-    return !hasConflict;
+    return !hasConflict && !isPastSlot(date, slot.startTime);
   });
 
   return {
@@ -119,6 +150,8 @@ export async function isSlotAvailable(
   endTime: string
 ): Promise<boolean> {
   await expireStalePendingPayments();
+
+  if (isPastSlot(date, startTime)) return false;
 
   // Check for overlapping reservations using: newStart < existingEnd && newEnd > existingStart
   const overlappingReservations = await prisma.reservation.findFirst({
