@@ -114,7 +114,7 @@ function ReservationPageContent() {
   return (
     <main className="page-content">
       {/* Premium Header */}
-      <header className="bg-gradient-to-b from-[#F7931E] to-[#FF9A2F] text-white shadow-lg">
+      <header className="premium-top-gradient">
         <div className="max-w-[420px] mx-auto px-5 py-4 pb-6 rounded-b-3xl">
           <Link href="/" className="inline-flex items-center mb-3 text-white/80 hover:text-white transition-colors">
             <svg className="w-5 h-5 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

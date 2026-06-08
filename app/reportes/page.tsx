@@ -122,8 +122,7 @@ function ReportsContent() {
 
   return (
     <main className="page-content bg-[#F8FAFC] min-h-screen">
-      <header className="relative overflow-hidden bg-[#0F172A]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0F172A] via-[#172554] to-[#F7931E] opacity-95"></div>
+      <header className="premium-top-gradient">
         <div className="relative px-5 pt-7 pb-8">
           <p className="text-white/60 text-xs font-semibold uppercase tracking-[0.2em]">Sport Seven</p>
           <h1 className="mt-2 text-2xl font-extrabold text-white">Reportes</h1>

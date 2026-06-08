@@ -32,8 +32,7 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
-      <header className="relative overflow-hidden bg-[#0F172A]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0F172A] via-[#16213A] to-[#F7931E] opacity-95"></div>
+      <header className="premium-top-gradient">
         <div className="relative max-w-[480px] mx-auto px-5 pt-6 pb-8">
           <Link href="/login" className="inline-flex items-center text-white/75 hover:text-white text-sm mb-5">
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

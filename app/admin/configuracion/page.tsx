@@ -166,7 +166,7 @@ function CourtConfigPage() {
   return (
     <main className="page-content">
       {/* Header */}
-      <header className="bg-gradient-to-b from-[#1FA3C8] to-[#1889A8] text-white shadow-lg">
+      <header className="premium-top-gradient">
         <div className="header-container px-4 py-4 pb-6 rounded-b-3xl">
           <Link href="/admin" className="inline-flex items-center mb-3 text-white/80 hover:text-white">
             <svg className="w-5 h-5 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

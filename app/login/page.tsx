@@ -31,12 +31,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
       {/* Compact Header */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#F7931E] to-[#F59E0B]"></div>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-2 right-12 w-20 h-20 bg-white rounded-full"></div>
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white rounded-full"></div>
-        </div>
+      <header className="premium-top-gradient">
         <div className="relative max-w-[480px] mx-auto w-full px-5 py-6">
           <Link href="/" className="inline-flex items-center mb-4 text-white/80 hover:text-white text-sm">
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

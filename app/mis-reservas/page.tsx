@@ -358,11 +358,7 @@ function MyReservationsContent() {
   return (
     <main className="page-content bg-[#F8FAFC]">
       {/* Compact Header */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#F7931E] to-[#F59E0B]"></div>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-2 right-8 w-16 h-16 bg-white rounded-full"></div>
-        </div>
+      <header className="premium-top-gradient">
         <div className="relative header-container px-5 pt-6 pb-5">
           <h1 className="text-2xl font-extrabold text-white leading-tight">
             {showAdminMetadata ? 'Reservas del Sistema' : 'Mis Reservas'}
