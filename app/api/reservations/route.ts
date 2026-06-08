@@ -63,6 +63,10 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         court: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
         user: {
           select: {
             id: true,
