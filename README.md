@@ -26,6 +26,7 @@ MERCADOPAGO_ACCESS_TOKEN="APP_USR-o-TEST-token"
 MERCADOPAGO_WEBHOOK_SECRET="clave-secreta-webhook"
 PAYMENT_MODE="full"
 RESERVATION_DEPOSIT_AMOUNT="5000"
+PAYMENT_HOLD_MINUTES="15"
 ```
 
 Reemplaza `PASSWORD` por la contrasena real de la base de datos de Supabase.
@@ -75,7 +76,7 @@ npx prisma db seed
 
 El flujo de pago usa Checkout Pro:
 
-1. La reserva se crea como `pending_payment`.
+1. La reserva se crea como `pending_payment` y retiene el horario solo por `PAYMENT_HOLD_MINUTES`.
 2. Se crea una preferencia de Mercado Pago.
 3. El usuario paga en Mercado Pago.
 4. El webhook `/api/payments/mercadopago/webhook` consulta el pago en Mercado Pago.

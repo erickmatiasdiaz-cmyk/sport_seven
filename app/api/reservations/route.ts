@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isSlotAvailable } from '@/lib/availability';
 import { requireAdmin } from '@/lib/auth';
+import { expireStalePendingPayments } from '@/lib/reservations';
 
 function isValidStatus(status: unknown) {
   return (
@@ -43,6 +44,7 @@ export async function GET(request: NextRequest) {
   try {
     const { response } = await requireAdmin(request);
     if (response) return response;
+    await expireStalePendingPayments();
 
     const { searchParams } = new URL(request.url);
     const phone = searchParams.get('phone');
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
   try {
     const { user, response } = await requireAdmin(request);
     if (response) return response;
+    await expireStalePendingPayments();
 
     const body = await request.json();
     const { courtId, customerName, customerPhone, date, startTime, endTime, status, durationMinutes } = body;
