@@ -1,10 +1,11 @@
-import crypto from 'crypto';
-import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 const SALT_ROUNDS = 10;
-const SESSION_COOKIE = 'sportseven_session';
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+const SESSION_COOKIE_NAME = 'sportseven_auth';
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS);
@@ -22,12 +23,15 @@ export interface UserSession {
   role: string;
 }
 
-function getSessionSecret() {
+function getAuthSecret() {
   const secret = process.env.AUTH_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error('AUTH_SECRET debe tener al menos 32 caracteres');
+  if (secret) return secret;
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('AUTH_SECRET debe estar configurado');
   }
-  return secret;
+
+  return 'development-only-sportseven-auth-secret';
 }
 
 function base64UrlEncode(value: string) {
@@ -38,82 +42,60 @@ function base64UrlDecode(value: string) {
   return Buffer.from(value, 'base64url').toString('utf8');
 }
 
-function signPayload(payload: string) {
+function sign(value: string) {
   return crypto
-    .createHmac('sha256', getSessionSecret())
-    .update(payload)
+    .createHmac('sha256', getAuthSecret())
+    .update(value)
     .digest('base64url');
 }
 
-function safeEqual(left: string, right: string) {
-  const leftBuffer = Buffer.from(left);
-  const rightBuffer = Buffer.from(right);
-  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
-}
+function verifySignature(value: string, signature: string) {
+  const expected = sign(value);
+  const expectedBuffer = Buffer.from(expected);
+  const actualBuffer = Buffer.from(signature);
 
-export function createSessionToken(user: UserSession): string {
-  const payload = base64UrlEncode(
-    JSON.stringify({
-      ...user,
-      exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS,
-    })
+  return (
+    expectedBuffer.length === actualBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, actualBuffer)
   );
-  return `${payload}.${signPayload(payload)}`;
 }
 
-export function readSessionToken(token?: string): UserSession | null {
-  if (!token) return null;
+function getCookie(request: Request, name: string) {
+  const cookies = request.headers.get('cookie');
+  if (!cookies) return null;
 
-  const [payload, signature] = token.split('.');
-  if (!payload || !signature || !safeEqual(signature, signPayload(payload))) return null;
+  const cookie = cookies
+    .split(';')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(`${name}=`));
 
-  try {
-    const parsed = JSON.parse(base64UrlDecode(payload)) as UserSession & { exp?: number };
-    if (!parsed.exp || parsed.exp < Math.floor(Date.now() / 1000)) return null;
-
-    return {
-      id: parsed.id,
-      name: parsed.name,
-      email: parsed.email,
-      phone: parsed.phone,
-      role: parsed.role,
-    };
-  } catch {
-    return null;
-  }
+  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : null;
 }
 
-export function getCurrentUser(request: NextRequest): UserSession | null {
-  return readSessionToken(request.cookies.get(SESSION_COOKIE)?.value);
+export function createSessionToken(userId: string) {
+  const payload = base64UrlEncode(JSON.stringify({
+    sub: userId,
+    exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
+  }));
+
+  return `${payload}.${sign(payload)}`;
 }
 
-export function requireUser(request: NextRequest): UserSession {
-  const user = getCurrentUser(request);
-  if (!user) throw new Error('UNAUTHENTICATED');
-  return user;
-}
-
-export function requireAdmin(request: NextRequest): UserSession {
-  const user = requireUser(request);
-  if (user.role !== 'admin') throw new Error('FORBIDDEN');
-  return user;
-}
-
-export function setSessionCookie(response: NextResponse, user: UserSession) {
+export function setAuthCookie(response: NextResponse, userId: string) {
   response.cookies.set({
-    name: SESSION_COOKIE,
-    value: createSessionToken(user),
+    name: SESSION_COOKIE_NAME,
+    value: createSessionToken(userId),
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: SESSION_MAX_AGE_SECONDS,
+    maxAge: SESSION_TTL_SECONDS,
   });
 }
 
-export function clearSessionCookie(response: NextResponse) {
+export function clearAuthCookie(response: NextResponse) {
   response.cookies.set({
-    name: SESSION_COOKIE,
+    name: SESSION_COOKIE_NAME,
     value: '',
     httpOnly: true,
     sameSite: 'lax',
@@ -123,14 +105,66 @@ export function clearSessionCookie(response: NextResponse) {
   });
 }
 
-export function authErrorResponse(error: unknown) {
-  if (error instanceof Error && error.message === 'UNAUTHENTICATED') {
-    return NextResponse.json({ error: 'Debes iniciar sesion' }, { status: 401 });
+export async function getCurrentUser(request: Request): Promise<UserSession | null> {
+  const token = getCookie(request, SESSION_COOKIE_NAME);
+  if (!token) return null;
+
+  const [payload, signature] = token.split('.');
+  if (!payload || !signature || !verifySignature(payload, signature)) return null;
+
+  try {
+    const decoded = JSON.parse(base64UrlDecode(payload)) as { sub?: string; exp?: number };
+    if (!decoded.sub || !decoded.exp || decoded.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.sub },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+      },
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone ?? undefined,
+      role: user.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function requireUser(request: Request) {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    return {
+      user: null,
+      response: NextResponse.json({ error: 'Debes iniciar sesión' }, { status: 401 }),
+    };
   }
 
-  if (error instanceof Error && error.message === 'FORBIDDEN') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+  return { user, response: null };
+}
+
+export async function requireAdmin(request: Request) {
+  const { user, response } = await requireUser(request);
+  if (response) return { user: null, response };
+
+  if (user!.role !== 'admin') {
+    return {
+      user: null,
+      response: NextResponse.json({ error: 'No autorizado' }, { status: 403 }),
+    };
   }
 
-  return null;
+  return { user: user!, response: null };
 }

@@ -56,10 +56,33 @@ model Reservation {
   durationMinutes Int      @default(60)
   status          String   @default("confirmed")
   createdAt       DateTime @default(now())
+  payments        Payment[]
 
   @@index([userId, date])
   @@index([courtId, date])
   @@map("reservations")
+}
+
+model Payment {
+  id                String       @id @default(cuid())
+  reservationId     String
+  reservation       Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  provider          String       @default("mercadopago")
+  providerPaymentId String?
+  preferenceId      String?
+  externalReference String       @unique
+  amount            Int
+  currency          String       @default("CLP")
+  status            String       @default("pending")
+  checkoutUrl       String?
+  rawStatus         String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  paidAt            DateTime?
+
+  @@index([reservationId])
+  @@index([providerPaymentId])
+  @@map("payments")
 }
 
 model BlockedSlot {

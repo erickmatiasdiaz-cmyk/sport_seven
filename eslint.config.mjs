@@ -1,15 +1,11 @@
+import { defineConfig } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 
-const eslintConfig = [
+export default defineConfig([
   ...nextVitals,
-  {
-    ignores: ['.next/**', 'node_modules/**'],
-  },
   {
     rules: {
       'react-hooks/set-state-in-effect': 'off',
     },
   },
-];
-
-export default eslintConfig;
+]);

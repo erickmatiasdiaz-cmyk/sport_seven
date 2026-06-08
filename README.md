@@ -1,78 +1,94 @@
 # Reserva Cancha - Sport Seven
 
-Sistema web para reserva de canchas de futbol del complejo deportivo Sport Seven. Esta version usa Next.js, Prisma y Supabase PostgreSQL.
+Sistema de reserva de canchas de futbol para el complejo deportivo Sport Seven.
 
-## Estado
+## Tecnologias
 
-- Proyecto Supabase: `sport-seven`
-- Project ref: `odprgjtfbjsbstuciobm`
-- Region: `sa-east-1`
-- Tablas creadas: `users`, `courts`, `reservations`, `blocked_slots`
-- Datos iniciales: 2 usuarios y 2 canchas
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma
+- PostgreSQL en Supabase
 
-## Variables De Entorno
+## Variables de entorno
 
-Copiar `.env.example` a `.env.local` en desarrollo, o configurar estas variables en Vercel:
+El proyecto esta conectado al proyecto Supabase `sport_seven`:
 
-```env
-DATABASE_URL="postgresql://postgres.odprgjtfbjsbstuciobm:YOUR_PASSWORD@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&schema=public"
-DIRECT_URL="postgresql://postgres.odprgjtfbjsbstuciobm:YOUR_PASSWORD@aws-0-sa-east-1.pooler.supabase.com:5432/postgres?schema=public"
-AUTH_SECRET="change-this-to-a-random-string-with-at-least-32-characters"
-ENABLE_BOOTSTRAP_DEMO_DATA="false"
+```bash
+DATABASE_URL="postgresql://postgres:PASSWORD@db.krxawudnypjazsqwswel.supabase.co:5432/postgres?schema=public"
+AUTH_SECRET="un-secreto-largo-y-aleatorio"
+ENABLE_BOOTSTRAP_DATA="false"
+BOOTSTRAP_ADMIN_EMAIL=""
+BOOTSTRAP_ADMIN_PASSWORD=""
+NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
+MERCADOPAGO_ACCESS_TOKEN="APP_USR-o-TEST-token"
+MERCADOPAGO_WEBHOOK_SECRET="clave-secreta-webhook"
+PAYMENT_MODE="full"
+RESERVATION_DEPOSIT_AMOUNT="5000"
 ```
 
-`YOUR_PASSWORD` es la password de base de datos del proyecto Supabase. `AUTH_SECRET` debe ser un valor privado y largo.
+Reemplaza `PASSWORD` por la contrasena real de la base de datos de Supabase.
 
-## Credenciales Iniciales
-
-Estas credenciales son solo para la primera entrada. Cambiarlas antes de entregar el sistema a un cliente.
-
-```txt
-Admin: admin@sportseven.cl / admin123
-Usuario demo: usuario@sportseven.cl / user123
-```
-
-## Desarrollo
+## Ejecucion local
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abrir `http://localhost:3000`.
+Abre http://localhost:3000.
 
-## Produccion
+## Verificacion
 
 ```bash
+npm run lint
 npm run build
-npm start
+npm audit --audit-level=moderate
 ```
 
-El script `build` ejecuta:
+## Base de datos
+
+Las migraciones fueron aplicadas en Supabase con el conector de Supabase. El build no ejecuta `prisma migrate deploy`; solo corre:
 
 ```bash
-prisma generate && prisma migrate deploy && next build
+prisma generate && next build
 ```
 
-## Funcionalidades
+Para nuevos entornos, aplica las migraciones Prisma antes de iniciar la app:
 
-- Registro e inicio de sesion con cookie httpOnly firmada.
-- Vista cliente para ver canchas activas, horarios disponibles y crear reservas.
-- Vista de "Mis reservas" con cancelacion solo para reservas propias.
-- Panel admin para ver reservas del sistema, crear reservas manuales, bloquear horarios y administrar canchas.
-- Validacion server-side de fecha, horario, duracion permitida, cancha activa y solapes.
-- Bloqueo transaccional por cancha/fecha para reducir carreras de doble reserva.
+```bash
+npx prisma migrate deploy
+npx prisma db seed
+```
 
 ## Seguridad
 
-- El servidor ya no confia en `userId`, `userRole`, query params ni headers enviados desde el cliente.
-- Las rutas admin usan la sesion firmada para autorizar.
-- Las cookies de sesion son `httpOnly`, `sameSite=lax` y `secure` en produccion.
-- `ENABLE_BOOTSTRAP_DEMO_DATA` debe permanecer en `false` en produccion.
+- La sesion se valida en servidor con cookie HTTP-only firmada.
+- Las APIs ya no aceptan `userId`, `userRole` ni `x-user-role` desde el cliente como autorizacion.
+- Supabase tiene RLS habilitado y politicas deny-all para la Data API.
+- La base bloquea reservas solapadas por cancha, fecha y horario.
+- Mercado Pago Checkout Pro confirma reservas solo cuando el webhook informa pago aprobado.
+- `ENABLE_BOOTSTRAP_DATA` debe permanecer en `false` en produccion.
 
-## Reglas Del Sistema
+## Mercado Pago
 
-- No se permiten reservas solapadas.
-- Duraciones soportadas: 60 y 90 minutos, segun configuracion de cada cancha.
-- Los horarios se validan contra apertura/cierre de la cancha.
-- Estados: `pending`, `confirmed`, `cancelled`.
+El flujo de pago usa Checkout Pro:
+
+1. La reserva se crea como `pending_payment`.
+2. Se crea una preferencia de Mercado Pago.
+3. El usuario paga en Mercado Pago.
+4. El webhook `/api/payments/mercadopago/webhook` consulta el pago en Mercado Pago.
+5. Si el pago esta `approved`, la reserva pasa a `confirmed`.
+
+Configura en Mercado Pago Developers el webhook productivo:
+
+```txt
+https://tu-dominio.vercel.app/api/payments/mercadopago/webhook
+```
+
+Si `PAYMENT_MODE=full`, se cobra el precio completo de la cancha. Si `PAYMENT_MODE=deposit`, se cobra el monto fijo de `RESERVATION_DEPOSIT_AMOUNT`.
+
+## Acceso
+
+La aplicacion esta cerrada para administradores. No publiques claves ni contrasenas en el repositorio. Si necesitas crear un admin inicial en un entorno nuevo, usa `BOOTSTRAP_ADMIN_EMAIL` y `BOOTSTRAP_ADMIN_PASSWORD` como variables privadas.

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface TimeSlot {
@@ -24,7 +23,6 @@ export default function ReservationForm({
   selectedSlot,
   durationMinutes = 60,
 }: ReservationFormProps) {
-  const router = useRouter();
   const { user } = useAuth();
   const [customerName, setCustomerName] = useState(user?.name ?? '');
   const [customerPhone, setCustomerPhone] = useState(user?.phone ?? '');
@@ -67,7 +65,6 @@ export default function ReservationForm({
           startTime: selectedSlot.startTime,
           endTime: selectedSlot.endTime,
           durationMinutes,
-          status: 'confirmed',
         }),
       });
 
@@ -76,11 +73,28 @@ export default function ReservationForm({
         throw new Error(data.error || 'Error creating reservation');
       }
 
-      localStorage.setItem('userPhone', customerPhone);
+      const reservation = await res.json();
+      const paymentRes = await fetch('/api/payments/mercadopago/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reservationId: reservation.id }),
+      });
+
+      if (!paymentRes.ok) {
+        const data = await paymentRes.json();
+        await fetch('/api/reservations', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: reservation.id, status: 'cancelled' }),
+        }).catch(() => {});
+        throw new Error(data.error || 'Error creating payment');
+      }
+
+      const payment = await paymentRes.json();
       setSuccess(true);
-      setTimeout(() => {
-        router.push('/mis-reservas?success=true');
-      }, 800);
+      window.location.href = payment.url;
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -99,8 +113,8 @@ export default function ReservationForm({
             </svg>
           </div>
           <div>
-            <p className="text-green-800 font-semibold text-sm">¡Reserva confirmada!</p>
-            <p className="text-green-600 text-xs">Redirigiendo...</p>
+            <p className="text-green-800 font-semibold text-sm">Reserva tomada</p>
+            <p className="text-green-600 text-xs">Redirigiendo a Mercado Pago...</p>
           </div>
         </div>
       )}
@@ -170,7 +184,7 @@ export default function ReservationForm({
           </span>
         ) : (
           <>
-            Confirmar Reserva
+            Ir a pagar
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>

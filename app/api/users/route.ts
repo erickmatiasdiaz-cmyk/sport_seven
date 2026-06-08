@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { authErrorResponse, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    requireAdmin(request);
+    const { response } = await requireAdmin(request);
+    if (response) return response;
 
     const users = await prisma.user.findMany({
       select: {
@@ -28,9 +29,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(users);
   } catch (error) {
-    const authError = authErrorResponse(error);
-    if (authError) return authError;
-
     return NextResponse.json(
       { error: 'Error fetching users' },
       { status: 500 }

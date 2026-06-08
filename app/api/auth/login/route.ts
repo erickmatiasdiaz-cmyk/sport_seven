@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
-import { comparePassword, setSessionCookie } from '@/lib/auth';
+import { comparePassword, setAuthCookie } from '@/lib/auth';
 
 // POST /api/auth/login
 export async function POST(request: NextRequest) {
@@ -49,10 +49,8 @@ export async function POST(request: NextRequest) {
       role: user.role,
     };
 
-    const response = NextResponse.json({
-      user: userSession,
-    });
-    setSessionCookie(response, userSession);
+    const response = NextResponse.json({ user: userSession });
+    setAuthCookie(response, user.id);
 
     return response;
   } catch (error: any) {

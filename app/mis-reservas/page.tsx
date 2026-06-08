@@ -35,11 +35,12 @@ interface Reservation {
 function MyReservationsContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
+  const paymentResult = searchParams.get('payment');
   const { user } = useAuth();
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showSuccess, setShowSuccess] = useState(success === 'true');
+  const [showSuccess, setShowSuccess] = useState(success === 'true' || paymentResult === 'success');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -106,6 +107,26 @@ function MyReservationsContent() {
       alert(error.message || 'Error al cancelar la reserva');
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handlePay = async (id: string) => {
+    try {
+      const res = await fetch('/api/payments/mercadopago/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservationId: id }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Error');
+      }
+
+      const payment = await res.json();
+      window.location.href = payment.url;
+    } catch (error: any) {
+      alert(error.message || 'Error al iniciar pago');
     }
   };
 
@@ -178,13 +199,18 @@ function MyReservationsContent() {
     (r) => !isToday(r.date) && r.status === 'confirmed' && isFuture(r.date, r.startTime)
   );
 
+  const pendingPaymentReservations = reservations.filter(
+    (r) => r.status === 'pending_payment' && isFuture(r.date, r.startTime)
+  );
+
   const historyReservations = reservations.filter(
-    (r) => r.status === 'cancelled' || (isToday(r.date) && r.status === 'confirmed' && !isFuture(r.date, r.startTime)) || (!isToday(r.date) && !isFuture(r.date, r.startTime) && r.status === 'confirmed')
+    (r) => r.status === 'cancelled' || r.status === 'payment_failed' || r.status === 'expired' || (isToday(r.date) && r.status === 'confirmed' && !isFuture(r.date, r.startTime)) || (!isToday(r.date) && !isFuture(r.date, r.startTime) && r.status === 'confirmed')
   );
 
   const getStatusBorderColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'border-l-[#22c55e]';
+      case 'pending_payment': return 'border-l-[#F7931E]';
       case 'cancelled': return 'border-l-[#ef4444]';
       default: return 'border-l-[#94A3B8]';
     }
@@ -208,8 +234,12 @@ function MyReservationsContent() {
             </span>
           ) : reservation.status === 'confirmed' ? (
             <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Confirmada</span>
+          ) : reservation.status === 'pending_payment' ? (
+            <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Pendiente pago</span>
           ) : reservation.status === 'cancelled' ? (
             <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Cancelada</span>
+          ) : reservation.status === 'payment_failed' ? (
+            <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Pago fallido</span>
           ) : (
             <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Completada</span>
           )}
@@ -304,6 +334,22 @@ function MyReservationsContent() {
             </svg>
             Cancelar reserva
           </button>
+        )}
+        {reservation.status === 'pending_payment' && isFuture(reservation.date, reservation.startTime) && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => handlePay(reservation.id)}
+              className="bg-[#F7931E] hover:bg-[#E07D0A] text-white py-2.5 rounded-xl text-xs font-semibold transition-colors"
+            >
+              Pagar ahora
+            </button>
+            <button
+              onClick={() => setShowCancelModal(reservation.id)}
+              className="bg-red-50 hover:bg-red-100 text-red-600 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
         )}
       </div>
     );
@@ -428,6 +474,26 @@ function MyReservationsContent() {
             )}
 
             {/* Upcoming Reservations */}
+            {pendingPaymentReservations.length > 0 && (
+              <section className="animate-fade-in-up">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <h2 className="text-base font-bold text-[#0F172A]">Pendientes de pago</h2>
+                  </div>
+                  <span className="text-xs font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full">
+                    {pendingPaymentReservations.length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {pendingPaymentReservations.map((reservation) => (
+                    <ReservationCard key={reservation.id} reservation={reservation} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Upcoming Reservations */}
             {upcomingReservations.length > 0 && (
               <section className="animate-fade-in-up">
                 <div className="flex items-center justify-between mb-3">
@@ -477,7 +543,7 @@ function MyReservationsContent() {
 
 export default function MyReservationsPage() {
   return (
-    <AuthGuard requireAuth={true}>
+    <AuthGuard requireAuth={true} requireAdmin={true}>
       <Suspense fallback={
         <main className="page-content flex justify-center items-center min-h-screen">
           <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#F7931E] border-t-transparent"></div>

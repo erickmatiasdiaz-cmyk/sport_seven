@@ -16,10 +16,9 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, password: string, phone?: string) => Promise<User>;
-  logout: () => Promise<void>;
+  logout: () => void;
   isAdmin: boolean;
   isAuthenticated: boolean;
-  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,24 +28,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUser = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/me', { cache: 'no-store' });
-      if (!res.ok) {
-        setUser(null);
-        return;
-      }
-
-      const data = await res.json();
-      setUser(data.user);
-    } catch {
-      setUser(null);
-    }
-  }, []);
-
   useEffect(() => {
-    refreshUser().finally(() => setLoading(false));
-  }, [refreshUser]);
+    let active = true;
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!active) return;
+
+        if (!res.ok) {
+          setUser(null);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data.user);
+      } catch {
+        if (active) setUser(null);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadUser();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     const res = await fetch('/api/auth/login', {
@@ -82,10 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user;
   }, []);
 
-  const logout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+  const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('userPhone');
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     router.replace('/login');
     router.refresh();
   }, [router]);
@@ -94,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin, isAuthenticated, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

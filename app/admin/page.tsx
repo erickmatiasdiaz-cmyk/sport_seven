@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth-guard';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface Court {
   id: string;
@@ -53,7 +52,6 @@ interface BlockedSlot {
 }
 
 function AdminPage() {
-  const { user } = useAuth();
   const [courts, setCourts] = useState<Court[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);

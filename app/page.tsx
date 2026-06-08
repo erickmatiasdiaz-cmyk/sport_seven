@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CourtCard from '@/components/court-card';
+import AuthGuard from '@/components/auth-guard';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Court {
@@ -17,7 +18,7 @@ interface Court {
   closingTime?: string;
 }
 
-export default function Home() {
+function HomeContent() {
   const { user } = useAuth();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,5 +184,13 @@ export default function Home() {
         )}
       </section>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <AuthGuard requireAuth={true} requireAdmin={true}>
+      <HomeContent />
+    </AuthGuard>
   );
 }

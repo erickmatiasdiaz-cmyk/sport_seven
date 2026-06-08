@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { authErrorResponse, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const { response } = await requireAdmin(request);
+    if (response) return response;
+
     const { searchParams } = new URL(request.url);
     const courtId = searchParams.get('courtId');
     const date = searchParams.get('date');
@@ -36,7 +39,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    requireAdmin(request);
+    const { response } = await requireAdmin(request);
+    if (response) return response;
 
     const { courtId, date, startTime, endTime, reason } = body;
 
@@ -62,9 +66,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(blockedSlot, { status: 201 });
   } catch (error: any) {
-    const authError = authErrorResponse(error);
-    if (authError) return authError;
-
     return NextResponse.json(
       { error: error.message || 'Error creating blocked slot' },
       { status: 500 }
@@ -74,7 +75,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    requireAdmin(request);
+    const { response } = await requireAdmin(request);
+    if (response) return response;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -92,9 +94,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const authError = authErrorResponse(error);
-    if (authError) return authError;
-
     return NextResponse.json(
       { error: 'Error deleting blocked slot' },
       { status: 500 }

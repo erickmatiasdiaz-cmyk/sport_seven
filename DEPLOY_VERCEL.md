@@ -2,44 +2,51 @@
 
 ## Base de datos
 
-SQLite no funciona bien en Vercel para este proyecto. La app debe usar PostgreSQL con `DATABASE_URL`.
+La app usa PostgreSQL en Supabase. Configura `DATABASE_URL` con la connection string privada del proyecto.
 
-### Opción 1: Neon
-1. Crear un proyecto en https://neon.tech
-2. Copiar la connection string de PostgreSQL
-3. Agregarla en Vercel > Project Settings > Environment Variables como `DATABASE_URL`
+## Variables requeridas
 
-### Opción 2: Supabase
-1. Crear un proyecto en https://supabase.com
-2. Ir a Project Settings > Database
-3. Copiar la connection string
-4. Agregarla en Vercel como `DATABASE_URL`
+```bash
+DATABASE_URL="postgresql://postgres:PASSWORD@db.krxawudnypjazsqwswel.supabase.co:5432/postgres?schema=public"
+AUTH_SECRET="un-secreto-largo-y-aleatorio"
+ENABLE_BOOTSTRAP_DATA="false"
+NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
+MERCADOPAGO_ACCESS_TOKEN="token-privado"
+MERCADOPAGO_WEBHOOK_SECRET="secreto-webhook"
+PAYMENT_MODE="full"
+RESERVATION_DEPOSIT_AMOUNT="5000"
+```
+
+No publiques tokens ni contrasenas en GitHub.
 
 ## Prisma
 
-El repositorio ya quedó preparado para producción con:
-
-- `provider = "postgresql"` en `prisma/schema.prisma`
-- migraciones versionadas en `prisma/migrations`
-- build de producción: `prisma generate && prisma migrate deploy && next build`
-
-## Pasos
-
-1. Hacer push a GitHub
-2. Importar el repositorio en Vercel
-3. Configurar `DATABASE_URL`
-4. Ejecutar el primer deploy
-
-## Datos iniciales
-
-La app crea datos base si la base está vacía:
-
-- admin: `admin@sportseven.cl` / `admin123`
-- usuario: `usuario@sportseven.cl` / `user123`
-- 2 canchas iniciales
-
-También se puede correr el seed manualmente si hace falta:
+El build de produccion ejecuta:
 
 ```bash
-npx prisma db seed
+prisma generate && next build
 ```
+
+Las migraciones se aplican fuera del build para evitar que cada deploy modifique la base.
+
+## Mercado Pago
+
+Configura en Mercado Pago Developers el webhook:
+
+```txt
+https://tu-dominio.vercel.app/api/payments/mercadopago/webhook
+```
+
+Activa notificaciones de pagos. En produccion, `MERCADOPAGO_WEBHOOK_SECRET` debe estar configurado para validar la firma.
+
+## Admin inicial
+
+La aplicacion esta cerrada para administradores. Si necesitas crear un admin inicial en un entorno nuevo, usa variables privadas:
+
+```bash
+ENABLE_BOOTSTRAP_DATA="true"
+BOOTSTRAP_ADMIN_EMAIL="admin@tu-dominio.cl"
+BOOTSTRAP_ADMIN_PASSWORD="contrasena-segura"
+```
+
+Despues del primer inicio, vuelve a dejar `ENABLE_BOOTSTRAP_DATA="false"`.

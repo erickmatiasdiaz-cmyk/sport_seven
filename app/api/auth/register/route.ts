@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, setSessionCookie } from '@/lib/auth';
+import { hashPassword, setAuthCookie } from '@/lib/auth';
 
 // POST /api/auth/register
 export async function POST(request: NextRequest) {
   try {
+    if (process.env.ENABLE_PUBLIC_REGISTRATION !== 'true') {
+      return NextResponse.json(
+        { error: 'Registro publico deshabilitado' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, password, phone } = body;
 
@@ -56,7 +63,7 @@ export async function POST(request: NextRequest) {
     };
 
     const response = NextResponse.json({ user: userSession }, { status: 201 });
-    setSessionCookie(response, userSession);
+    setAuthCookie(response, user.id);
 
     return response;
   } catch (error: any) {

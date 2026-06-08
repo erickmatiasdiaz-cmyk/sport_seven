@@ -14,25 +14,22 @@ async function runBootstrap() {
   ]);
 
   if (userCount === 0) {
-    const adminPassword = await bcrypt.hash('admin123', 10);
-    const userPassword = await bcrypt.hash('user123', 10);
+    const adminEmail = process.env.BOOTSTRAP_ADMIN_EMAIL;
+    const adminPasswordValue = process.env.BOOTSTRAP_ADMIN_PASSWORD;
 
-    await prisma.user.createMany({
-      data: [
-        {
-          name: 'Administrador',
-          email: 'admin@sportseven.cl',
-          password: adminPassword,
-          role: 'admin',
-        },
-        {
-          name: 'Juan Pérez',
-          email: 'usuario@sportseven.cl',
-          phone: '+56912345678',
-          password: userPassword,
-          role: 'user',
-        },
-      ],
+    if (!adminEmail || !adminPasswordValue) {
+      throw new Error('BOOTSTRAP_ADMIN_EMAIL y BOOTSTRAP_ADMIN_PASSWORD son requeridos para bootstrap');
+    }
+
+    const adminPassword = await bcrypt.hash(adminPasswordValue, 10);
+
+    await prisma.user.create({
+      data: {
+        name: 'Administrador',
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+      },
     });
   }
 
@@ -40,7 +37,7 @@ async function runBootstrap() {
     await prisma.court.createMany({
       data: [
         {
-          name: 'Cancha Fútbol 1',
+          name: 'Cancha Futbol 1',
           image: 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=400&h=250&fit=crop',
           isActive: true,
           price60: 20000,
@@ -51,7 +48,7 @@ async function runBootstrap() {
           allows90: false,
         },
         {
-          name: 'Cancha Fútbol 2',
+          name: 'Cancha Futbol 2',
           image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop',
           isActive: true,
           price60: 20000,
@@ -67,6 +64,10 @@ async function runBootstrap() {
 }
 
 export async function ensureBootstrapData() {
+  if (process.env.ENABLE_BOOTSTRAP_DATA !== 'true') {
+    return;
+  }
+
   if (!bootstrapPromise) {
     bootstrapPromise = runBootstrap().finally(() => {
       bootstrapPromise = null;

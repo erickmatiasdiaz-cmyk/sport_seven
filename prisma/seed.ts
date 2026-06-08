@@ -3,24 +3,25 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function ensureUser(params: {
-  email: string;
-  name: string;
-  password: string;
-  role: 'admin' | 'user';
-  phone?: string;
-}) {
-  const passwordHash = await bcrypt.hash(params.password, 10);
+async function ensureAdmin() {
+  const email = process.env.BOOTSTRAP_ADMIN_EMAIL;
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    console.log('Skipping admin seed: BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD are not set.');
+    return null;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
 
   return prisma.user.upsert({
-    where: { email: params.email },
+    where: { email },
     update: {},
     create: {
-      name: params.name,
-      email: params.email,
-      phone: params.phone,
+      name: 'Administrador',
+      email,
       password: passwordHash,
-      role: params.role,
+      role: 'admin',
     },
   });
 }
@@ -50,28 +51,14 @@ async function ensureCourt(params: {
 }
 
 async function main() {
-  const adminUser = await ensureUser({
-    name: 'Administrador',
-    email: 'admin@sportseven.cl',
-    password: 'admin123',
-    role: 'admin',
-  });
-
-  const regularUser = await ensureUser({
-    name: 'Juan Pérez',
-    email: 'usuario@sportseven.cl',
-    phone: '+56912345678',
-    password: 'user123',
-    role: 'user',
-  });
-
+  const adminUser = await ensureAdmin();
   const sharedSchedule = {
     openingTime: '14:00',
     closingTime: '23:00',
   };
 
   const court1 = await ensureCourt({
-    name: 'Cancha Fútbol 1',
+    name: 'Cancha Futbol 1',
     price60: 20000,
     price90: 30000,
     allows60: true,
@@ -82,7 +69,7 @@ async function main() {
   });
 
   const court2 = await ensureCourt({
-    name: 'Cancha Fútbol 2',
+    name: 'Cancha Futbol 2',
     price60: 20000,
     price90: 30000,
     allows60: true,
@@ -92,11 +79,9 @@ async function main() {
     ...sharedSchedule,
   });
 
-  console.log('Bootstrap completed successfully!');
-  console.log('Users ready:', adminUser.email, regularUser.email);
+  console.log('Seed completed successfully.');
+  if (adminUser) console.log('Admin ready:', adminUser.email);
   console.log('Courts ready:', court1.name, court2.name);
-  console.log('Admin login: admin@sportseven.cl / admin123');
-  console.log('User login: usuario@sportseven.cl / user123');
 }
 
 main()

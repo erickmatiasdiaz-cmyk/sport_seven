@@ -136,13 +136,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Register Link */}
           <div className="mt-6 pt-5 border-t border-[#E2E8F0] text-center">
             <p className="text-[#64748B] text-sm">
-              ¿No tienes cuenta?{' '}
-              <Link href="/registro" className="text-[#F7931E] font-semibold hover:underline">
-                Regístrate aquí
-              </Link>
+              Acceso exclusivo para administradores.
             </p>
           </div>
         </div>

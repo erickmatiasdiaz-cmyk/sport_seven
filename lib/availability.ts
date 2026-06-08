@@ -64,7 +64,7 @@ export async function getAvailableSlots(
       courtId,
       date,
       status: {
-        in: ['confirmed', 'pending'],
+        in: ['confirmed', 'pending', 'pending_payment'],
       },
     },
     select: {
@@ -117,7 +117,7 @@ export async function isSlotAvailable(
       courtId,
       date,
       status: {
-        in: ['confirmed', 'pending'],
+        in: ['confirmed', 'pending', 'pending_payment'],
       },
       AND: [
         {
