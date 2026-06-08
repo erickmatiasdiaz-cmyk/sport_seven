@@ -29,19 +29,23 @@ export default function BottomNav() {
         <span>Reservar</span>
       </Link>
 
-      <Link href="/mis-reservas" className={pathname === '/mis-reservas' ? 'active' : ''}>
-        <svg fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        <span>{isAdmin ? 'Reservas' : 'Mis Reservas'}</span>
-      </Link>
+      {user && (
+        <Link href="/mis-reservas" className={pathname === '/mis-reservas' ? 'active' : ''}>
+          <svg fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span>{isAdmin ? 'Reservas' : 'Mis Reservas'}</span>
+        </Link>
+      )}
 
-      <Link href="/reportes" className={pathname === '/reportes' ? 'active' : ''}>
-        <svg fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7 15l3-3 3 2 5-7" />
-        </svg>
-        <span>Reportes</span>
-      </Link>
+      {user && (
+        <Link href="/reportes" className={pathname === '/reportes' ? 'active' : ''}>
+          <svg fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7 15l3-3 3 2 5-7" />
+          </svg>
+          <span>Reportes</span>
+        </Link>
+      )}
 
       {isAdmin && (
         <Link href="/admin" className={pathname.startsWith('/admin') ? 'active' : ''}>

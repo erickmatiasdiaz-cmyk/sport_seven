@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin, requireUser } from '@/lib/auth';
+import { getCurrentUser, requireAdmin } from '@/lib/auth';
 
 // GET - List all courts (only active ones for non-admin)
 export async function GET(request: NextRequest) {
@@ -10,8 +10,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
-    const { user, response } = await requireUser(request);
-    if (response) return response;
+    const user = await getCurrentUser(request);
 
     const where: any = {};
     

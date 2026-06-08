@@ -159,7 +159,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <AuthGuard requireAuth={true}>
+    <AuthGuard requireAuth={false}>
       <HomeContent />
     </AuthGuard>
   );
