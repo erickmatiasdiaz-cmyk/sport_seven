@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import CourtCard from '@/components/court-card';
 import AuthGuard from '@/components/auth-guard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,13 +65,24 @@ function HomeContent() {
       >
         <div className="relative header-container px-5 pt-6 pb-8">
           <div className="flex items-center justify-between mb-8">
-            <div>
-              <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.28em]">
-                Sport Seven
-              </p>
-              <p className="mt-1 text-white text-sm font-semibold">
-                Hola, {user?.name.split(' ')[0] || 'bienvenido'}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="brand-mark">
+                <Image
+                  src="/sport-seven-logo.png"
+                  alt="Sport Seven"
+                  width={52}
+                  height={52}
+                  priority
+                />
+              </div>
+              <div>
+                <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.28em]">
+                  Sport Seven
+                </p>
+                <p className="mt-1 text-white text-sm font-semibold">
+                  Hola, {user?.name.split(' ')[0] || 'bienvenido'}
+                </p>
+              </div>
             </div>
             {user ? (
               <Link

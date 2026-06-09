@@ -9,6 +9,10 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Sport Seven - Reserva Cancha',
   description: 'Sistema de reserva de canchas deportivas',
+  icons: {
+    icon: '/sport-seven-icon.png',
+    apple: '/sport-seven-icon.png',
+  },
 };
 
 export default function RootLayout({
