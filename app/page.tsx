@@ -18,22 +18,36 @@ interface Court {
   closingTime?: string;
 }
 
+const fallbackHeroImage =
+  'https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&h=1200&fit=crop';
+
 function HomeContent() {
   const { user } = useAuth();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const sharedOpeningTime = courts[0]?.openingTime ?? '18:00';
+  const sharedOpeningTime = courts[0]?.openingTime ?? '14:00';
   const sharedClosingTime = courts[0]?.closingTime ?? '23:00';
+  const heroImage = courts[0]?.image || fallbackHeroImage;
+  const openHours =
+    courts.length > 0
+      ? Math.max(
+          ...courts.map((court) => {
+            const openHour = Number((court.openingTime ?? '14:00').split(':')[0]);
+            const closeHour = Number((court.closingTime ?? '23:00').split(':')[0]);
+            return Math.max(closeHour - openHour, 0);
+          })
+        )
+      : 9;
 
   useEffect(() => {
     async function fetchCourts() {
       try {
         const res = await fetch('/api/courts');
-        if (!res.ok) throw new Error('Error fetching courts');
+        if (!res.ok) return;
         setCourts(await res.json());
       } catch (error) {
-        console.error('Error:', error);
+        console.warn('No se pudieron cargar las canchas.', error);
       } finally {
         setLoading(false);
       }
@@ -43,109 +57,93 @@ function HomeContent() {
   }, []);
 
   return (
-    <main className="page-content bg-[#F8FAFC] min-h-screen">
-      <header className="premium-top-gradient">
-        <div className="relative header-container px-5 pt-6 pb-9">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-white/90 text-sm font-medium">
-              Hola, {user?.name.split(' ')[0] || 'bienvenido'}
-            </p>
+    <main className="page-content home-shell min-h-screen">
+      <header
+        className="premium-home-hero"
+        style={{ backgroundImage: `url("${heroImage}")` }}
+      >
+        <div className="relative header-container px-5 pt-6 pb-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.28em]">
+                Sport Seven
+              </p>
+              <p className="mt-1 text-white text-sm font-semibold">
+                Hola, {user?.name.split(' ')[0] || 'bienvenido'}
+              </p>
+            </div>
             {user ? (
               <Link
                 href="/reservar"
-                className="bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-white/25"
+                className="bg-white/12 hover:bg-white/20 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-white/20"
               >
                 Ver horarios
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="bg-white text-[#0F172A] px-3.5 py-1.5 rounded-full text-xs font-bold transition-all"
+                className="bg-white text-[#101828] px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-lg shadow-black/20"
               >
                 Ingresar
               </Link>
             )}
           </div>
 
-          <div className="mb-5">
-            <p className="text-white/60 text-xs font-semibold uppercase tracking-[0.2em]">Sport Seven</p>
-            <h1 className="mt-2 text-3xl font-extrabold text-white leading-tight">
-              Reserva tu cancha<br />sin llamadas
+          <div className="mb-7 max-w-[360px]">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/25 px-3 py-1.5 text-[11px] font-semibold text-white/85 backdrop-blur-md">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#F7931E]"></span>
+              Reserva online en segundos
+            </div>
+            <h1 className="text-[3.35rem] font-black leading-[0.88] tracking-normal text-white">
+              Sport<br />Seven
             </h1>
-            <p className="text-white/80 text-sm mt-1 font-medium">
-              Revisa disponibilidad real, elige horario y paga online cuando quieras.
+            <p className="mt-4 text-[15px] font-medium leading-5 text-white/82">
+              Canchas listas para jugar, horarios reales y pago online sin llamadas.
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
-            <div className="inline-flex w-fit items-center gap-2 bg-white/15 backdrop-blur-sm px-3.5 py-2 rounded-full border border-white/25">
+            <div className="inline-flex w-fit items-center gap-2 bg-white/12 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/20">
               <div className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></div>
               <span className="text-white text-xs font-semibold">
                 Abierto hoy {sharedOpeningTime} - {sharedClosingTime}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/reservar" className="rounded-2xl bg-[#F7931E] px-4 py-3 text-center text-sm font-extrabold text-white shadow-lg shadow-orange-900/20">
+              <Link href="/reservar" className="rounded-2xl bg-[#F7931E] px-4 py-3 text-center text-sm font-extrabold text-white shadow-lg shadow-orange-950/30">
                 Reservar ahora
               </Link>
-              <Link href={user ? '/mis-reservas' : '/registro'} className="rounded-2xl bg-white/12 px-4 py-3 text-center text-sm font-bold text-white ring-1 ring-white/20">
+              <Link href={user ? '/mis-reservas' : '/registro'} className="rounded-2xl bg-white/12 px-4 py-3 text-center text-sm font-bold text-white ring-1 ring-white/20 backdrop-blur-md">
                 {user ? 'Mis reservas' : 'Crear cuenta'}
               </Link>
+            </div>
+          </div>
+
+          <div className="hero-metrics mt-6 grid grid-cols-3 overflow-hidden rounded-[1.35rem] border border-white/14 bg-white/10 backdrop-blur-xl">
+            <div>
+              <strong>{courts.length || 2}</strong>
+              <span>Canchas</span>
+            </div>
+            <div>
+              <strong>Online</strong>
+              <span>Pago</span>
+            </div>
+            <div>
+              <strong>{openHours}</strong>
+              <span>Horas</span>
             </div>
           </div>
         </div>
       </header>
 
-      <section className="px-4 -mt-6 mb-6">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="metric-card animate-fade-in-up">
-            <div className="metric-icon bg-gradient-to-br from-[#E8F7FB] to-[#D4F0F8]">
-              <svg className="w-6 h-6 text-[#1FA3C8]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-              </svg>
-            </div>
-            <div className="metric-value">{courts.length}</div>
-            <div className="metric-label">Canchas</div>
-          </div>
-
-          <div className="metric-card animate-fade-in-up">
-            <div className="metric-icon bg-gradient-to-br from-[#FFF3C4] to-[#FDE68A]">
-              <svg className="w-6 h-6 text-[#F7931E]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
-                <path d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 1.45-.39 2.81-1.06 3.98l1.46 1.46C21.41 15.89 22 14.02 22 12c0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V3.03c-4.06.5-7.18 3.91-7.18 8.03 0 4.51 3.66 8.17 8.18 8.17 1.85 0 3.55-.62 4.92-1.66l-1.46-1.46A4.952 4.952 0 0112 19z" />
-              </svg>
-            </div>
-            <div className="metric-value text-[#F7931E]">Online</div>
-            <div className="metric-label">Pago</div>
-          </div>
-
-          <div className="metric-card animate-fade-in-up">
-            <div className="metric-icon bg-gradient-to-br from-[#DCFCE7] to-[#BBF7D0]">
-              <svg className="w-6 h-6 text-[#22C55E]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
-              </svg>
-            </div>
-            <div className="metric-value">
-              {courts.length > 0
-                ? Math.max(
-                    ...courts.map((court) => {
-                      const openHour = Number((court.openingTime ?? '18:00').split(':')[0]);
-                      const closeHour = Number((court.closingTime ?? '23:00').split(':')[0]);
-                      return Math.max(closeHour - openHour, 0);
-                    })
-                  )
-                : 0}
-            </div>
-            <div className="metric-label">Horas</div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4">
+      <section className="px-4 pt-7">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A]">Elige tu cancha</h2>
-            <p className="text-[#64748B] text-sm">Fotos, precios y horarios disponibles</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#F7931E]">
+              Disponibilidad real
+            </p>
+            <h2 className="mt-1 text-xl font-black text-[#0F172A]">Elige tu cancha</h2>
+            <p className="text-[#64748B] text-sm">Fotos, precios y horarios actualizados</p>
           </div>
         </div>
 

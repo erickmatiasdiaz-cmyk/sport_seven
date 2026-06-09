@@ -63,7 +63,7 @@ export default function CourtCard({ court }: { court: Court }) {
 
         {/* Type badge bottom-left over image */}
         <div className="absolute bottom-3.5 left-3.5 z-10">
-          <span className="inline-flex items-center bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+          <span className="inline-flex items-center bg-black/55 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-white/15">
             <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
             </svg>
@@ -81,7 +81,7 @@ export default function CourtCard({ court }: { court: Court }) {
 
         {/* Subtitle */}
         <p className="text-[#64748B] text-sm mb-4">
-          Cancha de fútbol profesional · Iluminación LED
+          Cancha de futbol profesional · Iluminacion LED
         </p>
 
         {/* Price row */}
