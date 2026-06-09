@@ -76,11 +76,11 @@ function HomeContent() {
                 />
               </div>
               <div>
-                <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.28em]">
-                  Sport Seven
-                </p>
-                <p className="mt-1 text-white text-sm font-semibold">
+                <p className="text-white text-sm font-semibold">
                   Hola, {user?.name.split(' ')[0] || 'bienvenido'}
+                </p>
+                <p className="mt-1 text-white/60 text-[11px] font-semibold">
+                  Complejo deportivo
                 </p>
               </div>
             </div>
@@ -107,7 +107,7 @@ function HomeContent() {
               Reserva online en segundos
             </div>
             <h1 className="text-[3.35rem] font-black leading-[0.88] tracking-normal text-white">
-              Sport<br />Seven
+              Reserva<br />tu cancha
             </h1>
             <p className="mt-4 text-[15px] font-medium leading-5 text-white/82">
               Canchas listas para jugar, horarios reales y pago online sin llamadas.
