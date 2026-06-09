@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, setAuthCookie } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 // POST /api/auth/register
 export async function POST(request: NextRequest) {
   try {
+    const limited = rateLimit(request, {
+      keyPrefix: 'auth:register',
+      maxRequests: 5,
+      windowMs: 60 * 1000,
+    });
+    if (limited) return limited;
+
     if (process.env.ENABLE_PUBLIC_REGISTRATION !== 'true') {
       return NextResponse.json(
         { error: 'Registro publico deshabilitado' },
@@ -66,9 +74,9 @@ export async function POST(request: NextRequest) {
     setAuthCookie(response, user.id);
 
     return response;
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al registrar usuario' },
+      { error: 'Error al registrar usuario' },
       { status: 500 }
     );
   }

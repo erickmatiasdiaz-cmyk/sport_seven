@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: error.message || 'Error al crear la reserva' },
+      { error: 'Error al crear la reserva' },
       { status: 500 }
     );
   }
@@ -226,9 +226,9 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json(updated);
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al actualizar la reserva' },
+      { error: 'Error al actualizar la reserva' },
       { status: 500 }
     );
   }

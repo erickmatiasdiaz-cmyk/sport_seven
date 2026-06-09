@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ensureBootstrapData } from '@/lib/bootstrap';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, setAuthCookie } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 // POST /api/auth/login
 export async function POST(request: NextRequest) {
   try {
+    const limited = rateLimit(request, {
+      keyPrefix: 'auth:login',
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+    });
+    if (limited) return limited;
+
     await ensureBootstrapData();
 
     const body = await request.json();
@@ -53,9 +61,9 @@ export async function POST(request: NextRequest) {
     setAuthCookie(response, user.id);
 
     return response;
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al iniciar sesión' },
+      { error: 'Error al iniciar sesion' },
       { status: 500 }
     );
   }

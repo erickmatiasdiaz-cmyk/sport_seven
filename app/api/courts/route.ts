@@ -97,9 +97,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(court, { status: 201 });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al crear la cancha' },
+      { error: 'Error al crear la cancha' },
       { status: 500 }
     );
   }
@@ -159,9 +159,9 @@ export async function PUT(request: NextRequest) {
     });
 
     return NextResponse.json(updated);
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al actualizar la cancha' },
+      { error: 'Error al actualizar la cancha' },
       { status: 500 }
     );
   }
@@ -199,9 +199,9 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al eliminar la cancha' },
+      { error: 'Error al eliminar la cancha' },
       { status: 500 }
     );
   }

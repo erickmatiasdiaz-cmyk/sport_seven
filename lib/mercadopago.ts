@@ -121,7 +121,7 @@ export async function getMercadoPagoPayment(paymentId: string) {
 
 export function verifyMercadoPagoWebhookSignature(request: Request, dataId: string) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-  if (!secret) return process.env.NODE_ENV !== 'production';
+  if (!secret) return false;
 
   const xSignature = request.headers.get('x-signature');
   const xRequestId = request.headers.get('x-request-id');

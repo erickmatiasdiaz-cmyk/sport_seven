@@ -102,9 +102,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: checkoutUrl });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al crear pago' },
+      { error: 'Error al crear pago' },
       { status: 500 }
     );
   }

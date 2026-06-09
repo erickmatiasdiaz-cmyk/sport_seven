@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(blockedSlot, { status: 201 });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error creating blocked slot' },
+      { error: 'Error creating blocked slot' },
       { status: 500 }
     );
   }
