@@ -11,6 +11,7 @@ DATABASE_URL="postgresql://postgres:PASSWORD@db.krxawudnypjazsqwswel.supabase.co
 AUTH_SECRET="un-secreto-largo-y-aleatorio"
 ENABLE_BOOTSTRAP_DATA="false"
 NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
+NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY="public-key"
 MERCADOPAGO_ACCESS_TOKEN="token-privado"
 MERCADOPAGO_WEBHOOK_SECRET="secreto-webhook"
 PAYMENT_MODE="full"
