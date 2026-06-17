@@ -141,7 +141,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const reservationStatus = isValidStatus(status) ? status : 'pending_payment';
+    // Solo un admin puede fijar el estado al crear (p. ej. reservas manuales).
+    // Un usuario normal siempre crea la reserva pendiente de pago para no
+    // poder saltarse Mercado Pago.
+    const reservationStatus =
+      user.role === 'admin' && isValidStatus(status) ? status : 'pending_payment';
     const available = await isSlotAvailable(courtId, date, startTime, endTime);
 
     if (!available) {
@@ -213,6 +217,15 @@ export async function PATCH(request: NextRequest) {
     if (user?.role !== 'admin' && reservation.userId !== user?.id) {
       return NextResponse.json(
         { error: 'No autorizado' },
+        { status: 403 }
+      );
+    }
+
+    // Un usuario normal solo puede cancelar su reserva. Confirmar o cambiar a
+    // otros estados queda reservado a admin para no saltarse el pago.
+    if (user?.role !== 'admin' && status !== 'cancelled') {
+      return NextResponse.json(
+        { error: 'Solo puedes cancelar tus reservas' },
         { status: 403 }
       );
     }

@@ -4,10 +4,7 @@ import { prisma } from '@/lib/prisma';
 let bootstrapPromise: Promise<void> | null = null;
 
 async function runBootstrap() {
-  if (process.env.ENABLE_BOOTSTRAP_DEMO_DATA !== 'true') {
-    return;
-  }
-
+  // El gate de la variable de entorno se aplica en ensureBootstrapData().
   const [userCount, courtCount] = await Promise.all([
     prisma.user.count(),
     prisma.court.count(),

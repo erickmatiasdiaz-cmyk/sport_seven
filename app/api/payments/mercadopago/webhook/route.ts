@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
 
     const paymentStatus = mapPaymentStatus(mercadoPagoPayment.status);
     const reservationStatus = mapReservationStatus(mercadoPagoPayment.status);
+    const paidAmount = Math.round(mercadoPagoPayment.transaction_amount || 0);
 
     await prisma.$transaction(async (tx) => {
       const reservation = await tx.reservation.findUnique({
@@ -63,27 +64,46 @@ export async function POST(request: NextRequest) {
 
       if (!reservation) return;
 
-      await tx.payment.upsert({
+      const existingPayment = await tx.payment.findUnique({
         where: { externalReference: reservationId },
-        update: {
-          providerPaymentId: mercadoPagoPayment.id.toString(),
-          amount: Math.round(mercadoPagoPayment.transaction_amount || 0),
-          status: paymentStatus,
-          rawStatus: mercadoPagoPayment.status,
-          paidAt: paymentStatus === 'approved' ? new Date() : undefined,
-        },
-        create: {
-          reservationId,
-          externalReference: reservationId,
-          providerPaymentId: mercadoPagoPayment.id.toString(),
-          amount: Math.round(mercadoPagoPayment.transaction_amount || 0),
-          status: paymentStatus,
-          rawStatus: mercadoPagoPayment.status,
-          paidAt: paymentStatus === 'approved' ? new Date() : undefined,
-        },
       });
+      const expectedAmount = existingPayment?.amount ?? 0;
+      // Nunca escribimos un monto <= 0 (viola el CHECK amount > 0 de la BD).
+      const amountToStore = paidAmount > 0 ? paidAmount : expectedAmount;
+
+      if (existingPayment || amountToStore > 0) {
+        await tx.payment.upsert({
+          where: { externalReference: reservationId },
+          update: {
+            providerPaymentId: mercadoPagoPayment.id.toString(),
+            amount: amountToStore,
+            status: paymentStatus,
+            rawStatus: mercadoPagoPayment.status,
+            paidAt: paymentStatus === 'approved' ? new Date() : undefined,
+          },
+          create: {
+            reservationId,
+            externalReference: reservationId,
+            providerPaymentId: mercadoPagoPayment.id.toString(),
+            amount: amountToStore,
+            status: paymentStatus,
+            rawStatus: mercadoPagoPayment.status,
+            paidAt: paymentStatus === 'approved' ? new Date() : undefined,
+          },
+        });
+      }
 
       if (reservation.status === 'cancelled') return;
+
+      // Defensa en profundidad: no confirmar una reserva si el pago aprobado
+      // llega por un monto menor al esperado.
+      if (
+        mercadoPagoPayment.status === 'approved' &&
+        expectedAmount > 0 &&
+        paidAmount < expectedAmount
+      ) {
+        return;
+      }
 
       await tx.reservation.update({
         where: { id: reservationId },

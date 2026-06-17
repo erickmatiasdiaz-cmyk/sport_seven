@@ -194,6 +194,22 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Si la cancha tiene reservas (y por lo tanto posibles pagos), no la
+    // borramos en cascada para no perder el historial financiero/auditoria.
+    // En su lugar la desactivamos (soft delete).
+    const reservationCount = await prisma.reservation.count({
+      where: { courtId: id },
+    });
+
+    if (reservationCount > 0) {
+      await prisma.court.update({
+        where: { id },
+        data: { isActive: false },
+      });
+
+      return NextResponse.json({ success: true, deactivated: true });
+    }
+
     await prisma.court.delete({
       where: { id },
     });
