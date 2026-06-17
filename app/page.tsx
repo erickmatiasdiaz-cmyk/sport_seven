@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface Court {
   id: string;
   name: string;
+  description?: string | null;
   image: string;
   price60: number;
   price90: number;

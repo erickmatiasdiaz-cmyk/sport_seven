@@ -27,6 +27,7 @@ model User {
 model Court {
   id            String         @id @default(cuid())
   name          String
+  description   String?
   image         String         @default("https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=400&h=250&fit=crop")
   isActive      Boolean        @default(true)
   price60       Int            @default(20000)

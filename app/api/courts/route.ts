@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
 
     const {
       name,
+      description,
       image,
       price60,
       price90,
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
       const createdCourt = await tx.court.create({
         data: {
           name,
+          description: description || null,
           image: image || 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=400&h=250&fit=crop',
           price60: price60 || 20000,
           price90: price90 || 30000,

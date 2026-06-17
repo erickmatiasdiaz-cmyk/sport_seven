@@ -8,6 +8,7 @@ import AuthGuard from '@/components/auth-guard';
 interface Court {
   id: string;
   name: string;
+  description?: string | null;
   image: string;
   isActive: boolean;
   price60: number;
@@ -29,6 +30,7 @@ function CourtConfigPage() {
 
   const [formData, setFormData] = useState({
     name: '',
+    description: '',
     image: '',
     price60: 20000,
     price90: 30000,
@@ -59,6 +61,7 @@ function CourtConfigPage() {
   const resetForm = () => {
     setFormData({
       name: '',
+      description: '',
       image: '',
       price60: 20000,
       price90: 30000,
@@ -76,6 +79,7 @@ function CourtConfigPage() {
     setEditingCourt(court);
     setFormData({
       name: court.name,
+      description: court.description ?? '',
       image: court.image,
       price60: court.price60,
       price90: court.price90,
@@ -304,6 +308,21 @@ function CourtConfigPage() {
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm"
                   placeholder="Ej: Cancha Fútbol 3"
                   required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-text-dark mb-1.5">
+                  Descripción
+                </label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm"
+                  placeholder="Ej: Cancha de fútbol 7 · césped sintético"
+                  maxLength={120}
                 />
               </div>
 

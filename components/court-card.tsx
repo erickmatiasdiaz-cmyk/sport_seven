@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 interface Court {
   id: string;
   name: string;
+  description?: string | null;
   image: string;
   price60: number;
   price90: number;
@@ -81,7 +82,7 @@ export default function CourtCard({ court }: { court: Court }) {
 
         {/* Subtitle */}
         <p className="text-[#64748B] text-sm mb-4">
-          Cancha de fútbol profesional · Iluminación LED
+          {court.description?.trim() || 'Cancha de fútbol profesional · Iluminación LED'}
         </p>
 
         {/* Price row */}
