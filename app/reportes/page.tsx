@@ -55,7 +55,7 @@ function formatDate(date: string) {
 
 function downloadCsv(reservations: Reservation[]) {
   const rows = [
-    ['Fecha', 'Cancha', 'Horario', 'Duracion', 'Estado', 'Monto'],
+    ['Fecha', 'Cancha', 'Horario', 'Duración', 'Estado', 'Monto'],
     ...reservations.map((reservation) => [
       reservation.date,
       reservation.court.name,

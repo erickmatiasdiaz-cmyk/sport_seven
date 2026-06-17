@@ -81,7 +81,7 @@ export default function CourtCard({ court }: { court: Court }) {
 
         {/* Subtitle */}
         <p className="text-[#64748B] text-sm mb-4">
-          Cancha de futbol profesional · Iluminacion LED
+          Cancha de fútbol profesional · Iluminación LED
         </p>
 
         {/* Price row */}

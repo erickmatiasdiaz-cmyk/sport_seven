@@ -155,7 +155,7 @@ function HomeContent() {
               Disponibilidad real
             </p>
             <h2 className="mt-1 text-xl font-black text-[#0F172A]">Elige tu cancha</h2>
-            <p className="text-[#64748B] text-sm">Fotos, precios y horarios actualizados</p>
+            <p className="text-[#64748B] text-sm">Precios y horarios actualizados</p>
           </div>
         </div>
 

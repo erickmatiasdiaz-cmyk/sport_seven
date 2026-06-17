@@ -79,7 +79,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#0F172A] mb-2">Telefono</label>
+              <label className="block text-sm font-semibold text-[#0F172A] mb-2">Teléfono</label>
               <input
                 type="tel"
                 value={phone}
