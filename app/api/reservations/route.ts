@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isSlotAvailable } from '@/lib/availability';
 import { requireAdmin, requireUser } from '@/lib/auth';
-import { expireStalePendingPayments } from '@/lib/reservations';
+import { expireStalePendingPaymentsForSlot } from '@/lib/reservations';
 
 function isValidStatus(status: unknown) {
   return (
@@ -44,7 +44,6 @@ export async function GET(request: NextRequest) {
   try {
     const { user, response } = await requireUser(request);
     if (response) return response;
-    await expireStalePendingPayments();
 
     const { searchParams } = new URL(request.url);
     const phone = searchParams.get('phone');
@@ -97,7 +96,6 @@ export async function POST(request: NextRequest) {
   try {
     const { user, response } = await requireUser(request);
     if (response) return response;
-    await expireStalePendingPayments();
 
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== 'object') {
@@ -147,6 +145,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Libera holds de pago vencidos solo para esta cancha+fecha (consulta barata
+    // e indexada) antes de validar disponibilidad y crear, en vez del UPDATE global.
+    await expireStalePendingPaymentsForSlot(courtId, date);
 
     // Solo un admin puede fijar el estado al crear (p. ej. reservas manuales).
     // Un usuario normal siempre crea la reserva pendiente de pago para no

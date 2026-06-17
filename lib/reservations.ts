@@ -24,3 +24,22 @@ export async function expireStalePendingPayments() {
     },
   });
 }
+
+// Versión acotada a una cancha+fecha: barata (usa el índice courtId+date) y
+// segura de llamar en el camino de creación de reservas, en lugar del UPDATE
+// global que satura la base bajo concurrencia.
+export async function expireStalePendingPaymentsForSlot(courtId: string, date: string) {
+  return prisma.reservation.updateMany({
+    where: {
+      courtId,
+      date,
+      status: 'pending_payment',
+      createdAt: {
+        lt: getPaymentHoldExpirationDate(),
+      },
+    },
+    data: {
+      status: 'expired',
+    },
+  });
+}

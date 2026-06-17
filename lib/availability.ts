@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { expireStalePendingPayments, getPaymentHoldExpirationDate } from '@/lib/reservations';
+import { getPaymentHoldExpirationDate } from '@/lib/reservations';
 
 const APP_TIME_ZONE = 'America/Santiago';
 
@@ -71,8 +71,6 @@ export async function getAvailableSlots(
   date: string,
   durationMinutes: 60 | 90 = 60
 ) {
-  await expireStalePendingPayments();
-
   // Get court configuration
   const court = await prisma.court.findUnique({
     where: { id: courtId },
@@ -149,8 +147,6 @@ export async function isSlotAvailable(
   startTime: string,
   endTime: string
 ): Promise<boolean> {
-  await expireStalePendingPayments();
-
   if (isPastSlot(date, startTime)) return false;
 
   // Check for overlapping reservations using: newStart < existingEnd && newEnd > existingStart
