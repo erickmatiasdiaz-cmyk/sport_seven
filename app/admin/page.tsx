@@ -7,6 +7,8 @@ import AuthGuard from '@/components/auth-guard';
 interface Court {
   id: string;
   name: string;
+  openingTime?: string;
+  closingTime?: string;
 }
 
 interface Reservation {
@@ -51,12 +53,39 @@ interface BlockedSlot {
   court: Court;
 }
 
+function formatLocalDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function buildHourOptions(openingTime?: string, closingTime?: string) {
+  const [oh, om] = (openingTime || '18:00').split(':').map(Number);
+  const [ch, cm] = (closingTime || '23:00').split(':').map(Number);
+  let start = oh * 60 + om;
+  const end = ch * 60 + cm;
+  const options: { start: string; end: string }[] = [];
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return options;
+  while (start + 60 <= end) {
+    const sh = Math.floor(start / 60);
+    const sm = start % 60;
+    const e = start + 60;
+    options.push({
+      start: `${String(sh).padStart(2, '0')}:${String(sm).padStart(2, '0')}`,
+      end: `${String(Math.floor(e / 60)).padStart(2, '0')}:${String(e % 60).padStart(2, '0')}`,
+    });
+    start += 60;
+  }
+  return options;
+}
+
 function AdminPage() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [users, setUsers] = useState<RegisteredUser[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(formatLocalDate(new Date()));
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'reservations' | 'block' | 'users'>('reservations');
 
@@ -115,6 +144,10 @@ function AdminPage() {
 
   useEffect(() => { fetchCourts(); }, [fetchCourts]);
   useEffect(() => { if (selectedDate) fetchData(); }, [fetchData, selectedDate]);
+  useEffect(() => {
+    setNewReservation((prev) => ({ ...prev, date: selectedDate }));
+    setBlockSlot((prev) => ({ ...prev, date: selectedDate }));
+  }, [selectedDate]);
 
   const handleCancelReservation = async (id: string) => {
     if (!confirm('¿Cancelar esta reserva?')) return;
@@ -203,12 +236,23 @@ function AdminPage() {
         return <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Confirmada</span>;
       case 'pending':
         return <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Pendiente</span>;
+      case 'pending_payment':
+        return <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Pendiente pago</span>;
       case 'cancelled':
         return <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Cancelada</span>;
+      case 'expired':
+        return <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Expirada</span>;
+      case 'payment_failed':
+        return <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Pago fallido</span>;
       default:
         return null;
     }
   };
+
+  const reservationCourt = courts.find((c) => c.id === newReservation.courtId);
+  const reservationHourOptions = buildHourOptions(reservationCourt?.openingTime, reservationCourt?.closingTime);
+  const blockCourt = courts.find((c) => c.id === blockSlot.courtId);
+  const blockHourOptions = buildHourOptions(blockCourt?.openingTime, blockCourt?.closingTime);
 
   // Input/select styles
   const inputClass = "w-full px-4 py-3 rounded-xl border border-[#E2E8F0] focus:border-[#1FA3C8] focus:ring-2 focus:ring-[#1FA3C8]/10 outline-none transition-all text-sm bg-white text-[#0F172A] placeholder-[#94A3B8]";
@@ -292,25 +336,34 @@ function AdminPage() {
                   <h2 className="text-sm font-bold text-[#0F172A]">Crear Reserva Manual</h2>
                 </div>
                 <form onSubmit={handleCreateReservation} className="space-y-3">
-                  <select value={newReservation.courtId} onChange={(e) => setNewReservation({ ...newReservation, courtId: e.target.value })} className={inputClass} required>
+                  <select value={newReservation.courtId} onChange={(e) => {
+                    const courtId = e.target.value;
+                    const court = courts.find((c) => c.id === courtId);
+                    const first = buildHourOptions(court?.openingTime, court?.closingTime)[0];
+                    setNewReservation({ ...newReservation, courtId, startTime: first?.start ?? newReservation.startTime, endTime: first?.end ?? newReservation.endTime });
+                  }} className={inputClass} required>
                     <option value="">Seleccionar cancha</option>
                     {courts.map((court) => (<option key={court.id} value={court.id}>{court.name}</option>))}
                   </select>
                   <input type="text" placeholder="Nombre del cliente" value={newReservation.customerName} onChange={(e) => setNewReservation({ ...newReservation, customerName: e.target.value })} className={inputClass} required />
                   <input type="tel" placeholder="Teléfono" value={newReservation.customerPhone} onChange={(e) => setNewReservation({ ...newReservation, customerPhone: e.target.value })} className={inputClass} required />
+                  <input type="date" value={newReservation.date} onChange={(e) => setNewReservation({ ...newReservation, date: e.target.value })} className={inputClass} required />
                   <select
                     value={newReservation.startTime}
                     onChange={(e) => {
                       const start = e.target.value;
-                      const endHour = parseInt(start) + 1;
-                      setNewReservation({ ...newReservation, startTime: start, endTime: `${endHour.toString().padStart(2, '0')}:00` });
+                      const opt = reservationHourOptions.find((o) => o.start === start);
+                      setNewReservation({ ...newReservation, startTime: start, endTime: opt?.end ?? start });
                     }}
                     className={inputClass}
                     required
                   >
-                    {Array.from({ length: 5 }, (_, i) => 18 + i).map((hour) => (
-                      <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                        {hour.toString().padStart(2, '0')}:00 – {(hour + 1).toString().padStart(2, '0')}:00
+                    {reservationHourOptions.length === 0 && (
+                      <option value="">Sin horarios disponibles</option>
+                    )}
+                    {reservationHourOptions.map((opt) => (
+                      <option key={opt.start} value={opt.start}>
+                        {opt.start} – {opt.end}
                       </option>
                     ))}
                   </select>
@@ -429,7 +482,12 @@ function AdminPage() {
                   <h2 className="text-sm font-bold text-[#0F172A]">Bloquear Horario</h2>
                 </div>
                 <form onSubmit={handleBlockSlot} className="space-y-3">
-                  <select value={blockSlot.courtId} onChange={(e) => setBlockSlot({ ...blockSlot, courtId: e.target.value })} className={inputClass} required>
+                  <select value={blockSlot.courtId} onChange={(e) => {
+                    const courtId = e.target.value;
+                    const court = courts.find((c) => c.id === courtId);
+                    const first = buildHourOptions(court?.openingTime, court?.closingTime)[0];
+                    setBlockSlot({ ...blockSlot, courtId, startTime: first?.start ?? blockSlot.startTime, endTime: first?.end ?? blockSlot.endTime });
+                  }} className={inputClass} required>
                     <option value="">Seleccionar cancha</option>
                     {courts.map((court) => (<option key={court.id} value={court.id}>{court.name}</option>))}
                   </select>
@@ -438,15 +496,18 @@ function AdminPage() {
                     value={blockSlot.startTime}
                     onChange={(e) => {
                       const start = e.target.value;
-                      const endHour = parseInt(start) + 1;
-                      setBlockSlot({ ...blockSlot, startTime: start, endTime: `${endHour.toString().padStart(2, '0')}:00` });
+                      const opt = blockHourOptions.find((o) => o.start === start);
+                      setBlockSlot({ ...blockSlot, startTime: start, endTime: opt?.end ?? start });
                     }}
                     className={inputClass}
                     required
                   >
-                    {Array.from({ length: 5 }, (_, i) => 18 + i).map((hour) => (
-                      <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                        {hour.toString().padStart(2, '0')}:00 – {(hour + 1).toString().padStart(2, '0')}:00
+                    {blockHourOptions.length === 0 && (
+                      <option value="">Sin horarios disponibles</option>
+                    )}
+                    {blockHourOptions.map((opt) => (
+                      <option key={opt.start} value={opt.start}>
+                        {opt.start} – {opt.end}
                       </option>
                     ))}
                   </select>

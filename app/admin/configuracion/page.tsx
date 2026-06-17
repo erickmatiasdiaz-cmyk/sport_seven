@@ -93,7 +93,7 @@ function CourtConfigPage() {
     setSaving(true);
 
     try {
-      const url = editingCourt ? '/api/courts' : '/api/courts';
+      const url = '/api/courts';
       const method = editingCourt ? 'PUT' : 'POST';
 
       const body: any = { ...formData };
@@ -186,7 +186,7 @@ function CourtConfigPage() {
   };
 
   const handleDelete = async (courtId: string) => {
-    if (!confirm('¿Eliminar esta cancha? Esta acción no se puede deshacer.')) return;
+    if (!confirm('¿Eliminar esta cancha? Si tiene reservas, se desactivará para conservar el historial en lugar de borrarse.')) return;
 
     try {
       const res = await fetch(`/api/courts?id=${courtId}`, {
@@ -194,8 +194,13 @@ function CourtConfigPage() {
       });
 
       if (!res.ok) throw new Error('Error');
+      const data = await res.json().catch(() => ({}));
       fetchCourts();
-      alert('Cancha eliminada');
+      alert(
+        data?.deactivated
+          ? 'La cancha tenía reservas: se desactivó (no se eliminó) para conservar el historial.'
+          : 'Cancha eliminada'
+      );
     } catch (error) {
       alert('Error al eliminar la cancha');
     }

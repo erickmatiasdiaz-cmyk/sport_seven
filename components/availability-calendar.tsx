@@ -131,11 +131,12 @@ export default function AvailabilityCalendar({
     allSlots.push({ startTime, endTime });
   }
 
-  const isReserved = (slot: TimeSlot) =>
-    reservedSlots.some((r) => r.startTime === slot.startTime && r.endTime === slot.endTime);
+  const overlaps = (slot: TimeSlot, other: { startTime: string; endTime: string }) =>
+    slot.startTime < other.endTime && slot.endTime > other.startTime;
 
-  const isBlocked = (slot: TimeSlot) =>
-    blockedSlotsData.some((b) => b.startTime === slot.startTime && b.endTime === slot.endTime);
+  const isReserved = (slot: TimeSlot) => reservedSlots.some((r) => overlaps(slot, r));
+
+  const isBlocked = (slot: TimeSlot) => blockedSlotsData.some((b) => overlaps(slot, b));
 
   const isAvailable = (slot: TimeSlot) =>
     availableSlots.some((s) => s.startTime === slot.startTime && s.endTime === slot.endTime);

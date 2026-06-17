@@ -99,7 +99,13 @@ export async function POST(request: NextRequest) {
     if (response) return response;
     await expireStalePendingPayments();
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Cuerpo de la solicitud invalido' },
+        { status: 400 }
+      );
+    }
     const { courtId, customerName, customerPhone, date, startTime, endTime, status, durationMinutes } = body;
 
     if (!courtId || !customerName || !customerPhone || !date || !startTime || !endTime) {
@@ -195,7 +201,13 @@ export async function PATCH(request: NextRequest) {
     const { user, response } = await requireUser(request);
     if (response) return response;
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Cuerpo de la solicitud invalido' },
+        { status: 400 }
+      );
+    }
     const { id, status } = body;
 
     if (!id || !isValidStatus(status)) {
