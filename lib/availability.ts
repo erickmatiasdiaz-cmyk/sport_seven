@@ -206,32 +206,3 @@ export async function isSlotAvailable(
 
   return true;
 }
-
-// Format date for display
-export function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T12:00:00');
-  return date.toLocaleDateString('es-CL', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-}
-
-// Get next 7 days
-export function getNextDays(days: number = 7): { date: string; label: string }[] {
-  const result: { date: string; label: string }[] = [];
-  const today = new Date();
-
-  for (let i = 0; i < days; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    const dateStr = date.toISOString().split('T')[0];
-    const label = date.toLocaleDateString('es-CL', {
-      weekday: 'short',
-      day: 'numeric',
-    });
-    result.push({ date: dateStr, label });
-  }
-
-  return result;
-}

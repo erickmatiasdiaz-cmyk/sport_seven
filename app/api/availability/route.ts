@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
 
     const availability = await getAvailableSlots(courtId, date, durationMinutes);
     return NextResponse.json(availability);
-  } catch {
+  } catch (error) {
+    console.error('[availability] GET', error);
     return NextResponse.json(
       { error: 'Error fetching availability' },
       { status: 500 }

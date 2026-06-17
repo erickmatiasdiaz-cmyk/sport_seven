@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(blockedSlots);
   } catch (error) {
+    console.error('[blocked-slots] GET', error);
     return NextResponse.json(
       { error: 'Error fetching blocked slots' },
       { status: 500 }
@@ -65,7 +66,21 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(blockedSlot, { status: 201 });
-  } catch {
+  } catch (error: any) {
+    const message = String(error?.message ?? '');
+    if (message.includes('blocked_slots_no_overlap')) {
+      return NextResponse.json(
+        { error: 'Ya existe un bloqueo que se solapa con ese horario' },
+        { status: 409 }
+      );
+    }
+    if (message.includes('blocked_slots_time_order_check')) {
+      return NextResponse.json(
+        { error: 'La hora de inicio debe ser anterior a la de termino' },
+        { status: 400 }
+      );
+    }
+    console.error('[blocked-slots] POST', error);
     return NextResponse.json(
       { error: 'Error creating blocked slot' },
       { status: 500 }
@@ -94,6 +109,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('[blocked-slots] DELETE', error);
     return NextResponse.json(
       { error: 'Error deleting blocked slot' },
       { status: 500 }

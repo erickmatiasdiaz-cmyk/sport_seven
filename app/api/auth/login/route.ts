@@ -61,7 +61,8 @@ export async function POST(request: NextRequest) {
     setAuthCookie(response, user.id);
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error('[auth/login] POST', error);
     return NextResponse.json(
       { error: 'Error al iniciar sesion' },
       { status: 500 }

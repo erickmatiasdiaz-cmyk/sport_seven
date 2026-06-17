@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
     setAuthCookie(response, user.id);
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error('[auth/register] POST', error);
     return NextResponse.json(
       { error: 'Error al registrar usuario' },
       { status: 500 }

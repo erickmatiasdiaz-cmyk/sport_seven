@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json(courts);
   } catch (error) {
+    console.error('[courts] GET', error);
     return NextResponse.json(
       { error: 'Error fetching courts' },
       { status: 500 }
@@ -97,7 +98,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(court, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('[courts] POST', error);
     return NextResponse.json(
       { error: 'Error al crear la cancha' },
       { status: 500 }
@@ -159,7 +161,8 @@ export async function PUT(request: NextRequest) {
     });
 
     return NextResponse.json(updated);
-  } catch {
+  } catch (error) {
+    console.error('[courts] PUT', error);
     return NextResponse.json(
       { error: 'Error al actualizar la cancha' },
       { status: 500 }
@@ -215,7 +218,8 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('[courts] DELETE', error);
     return NextResponse.json(
       { error: 'Error al eliminar la cancha' },
       { status: 500 }

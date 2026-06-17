@@ -84,7 +84,8 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(reservations);
-  } catch {
+  } catch (error) {
+    console.error('[reservations] GET', error);
     return NextResponse.json(
       { error: 'Error fetching reservations' },
       { status: 500 }
@@ -181,6 +182,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.error('[reservations] POST', error);
     return NextResponse.json(
       { error: 'Error al crear la reserva' },
       { status: 500 }
@@ -239,7 +241,8 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json(updated);
-  } catch {
+  } catch (error) {
+    console.error('[reservations] PATCH', error);
     return NextResponse.json(
       { error: 'Error al actualizar la reserva' },
       { status: 500 }
