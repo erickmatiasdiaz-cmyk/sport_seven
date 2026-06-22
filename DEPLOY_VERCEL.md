@@ -11,9 +11,9 @@ DATABASE_URL="postgresql://postgres:PASSWORD@db.krxawudnypjazsqwswel.supabase.co
 AUTH_SECRET="un-secreto-largo-y-aleatorio"
 ENABLE_BOOTSTRAP_DATA="false"
 NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
-NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY="public-key"
-MERCADOPAGO_ACCESS_TOKEN="token-privado"
-MERCADOPAGO_WEBHOOK_SECRET="secreto-webhook"
+TRANSBANK_ENVIRONMENT="production"
+TRANSBANK_COMMERCE_CODE="codigo-comercio-webpay"
+TRANSBANK_API_KEY="api-key-secret-webpay"
 PAYMENT_MODE="full"
 RESERVATION_DEPOSIT_AMOUNT="5000"
 ```
@@ -30,15 +30,19 @@ prisma generate && next build
 
 Las migraciones se aplican fuera del build para evitar que cada deploy modifique la base.
 
-## Mercado Pago
+## Transbank Webpay Plus
 
-Configura en Mercado Pago Developers el webhook:
+No requiere webhook: Webpay confirma en el retorno del navegador a
+`/api/payments/transbank/commit`. Para cobros reales define en Vercel:
 
 ```txt
-https://tu-dominio.vercel.app/api/payments/mercadopago/webhook
+TRANSBANK_ENVIRONMENT="production"
+TRANSBANK_COMMERCE_CODE="<codigo de comercio Webpay Plus>"
+TRANSBANK_API_KEY="<api key secret de Webpay Plus>"
 ```
 
-Activa notificaciones de pagos. En produccion, `MERCADOPAGO_WEBHOOK_SECRET` debe estar configurado para validar la firma.
+`NEXT_PUBLIC_APP_URL` debe ser el dominio publico, porque la `return_url` que
+recibe Transbank se construye a partir de esa variable.
 
 ## Admin inicial
 

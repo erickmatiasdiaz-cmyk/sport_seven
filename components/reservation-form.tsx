@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { redirectToWebpay } from '@/lib/redirect-to-webpay';
 
 interface TimeSlot {
   startTime: string;
@@ -74,7 +75,7 @@ export default function ReservationForm({
       }
 
       const reservation = await res.json();
-      const paymentRes = await fetch('/api/payments/mercadopago/create', {
+      const paymentRes = await fetch('/api/payments/transbank/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export default function ReservationForm({
 
       const payment = await paymentRes.json();
       setSuccess(true);
-      window.location.href = payment.url;
+      redirectToWebpay(payment.url, payment.token);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -114,7 +115,7 @@ export default function ReservationForm({
           </div>
           <div>
             <p className="text-green-800 font-semibold text-sm">Reserva tomada</p>
-            <p className="text-green-600 text-xs">Redirigiendo a Mercado Pago...</p>
+            <p className="text-green-600 text-xs">Redirigiendo a Webpay...</p>
           </div>
         </div>
       )}

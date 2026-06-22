@@ -11,6 +11,20 @@ export function getPaymentHoldExpirationDate() {
   return new Date(Date.now() - getPaymentHoldMinutes() * 60 * 1000);
 }
 
+// Monto a cobrar por una reserva. En modo "deposit" cobra un monto fijo; en
+// modo "full" cobra el precio de la cancha segun la duracion.
+export function getReservationPaymentAmount(
+  price60?: number | null,
+  price90?: number | null,
+  durationMinutes = 60
+) {
+  if (process.env.PAYMENT_MODE === 'deposit') {
+    return Number(process.env.RESERVATION_DEPOSIT_AMOUNT || 5000);
+  }
+
+  return durationMinutes === 90 ? Number(price90 || 0) : Number(price60 || 0);
+}
+
 export async function expireStalePendingPayments() {
   return prisma.reservation.updateMany({
     where: {

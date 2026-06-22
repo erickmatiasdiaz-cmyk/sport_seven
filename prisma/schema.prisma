@@ -68,9 +68,14 @@ model Payment {
   id                String       @id @default(cuid())
   reservationId     String
   reservation       Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  provider          String       @default("mercadopago")
+  provider          String       @default("transbank")
   providerPaymentId String?
-  preferenceId      String?
+  preferenceId      String?      // Legacy MercadoPago (se conserva por historial)
+  token             String?      // Token de Webpay Plus (token_ws)
+  buyOrder          String?      // buy_order enviado a Webpay
+  authorizationCode String?      // Codigo de autorizacion entregado por Webpay
+  paymentTypeCode   String?      // VD (debito), VC/VN (credito), VP (prepago), etc.
+  installments      Int?
   externalReference String       @unique
   amount            Int
   currency          String       @default("CLP")
@@ -83,6 +88,7 @@ model Payment {
 
   @@index([reservationId])
   @@index([providerPaymentId])
+  @@index([token])
   @@map("payments")
 }
 

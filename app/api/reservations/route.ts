@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
 
     // Solo un admin puede fijar el estado al crear (p. ej. reservas manuales).
     // Un usuario normal siempre crea la reserva pendiente de pago para no
-    // poder saltarse Mercado Pago.
+    // poder saltarse Webpay.
     const reservationStatus =
       user.role === 'admin' && isValidStatus(status) ? status : 'pending_payment';
     const available = await isSlotAvailable(courtId, date, startTime, endTime);

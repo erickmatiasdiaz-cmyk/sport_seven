@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth-guard';
 import { useAuth } from '@/contexts/AuthContext';
+import { redirectToWebpay } from '@/lib/redirect-to-webpay';
 
 interface Reservation {
   id: string;
@@ -112,7 +113,7 @@ function MyReservationsContent() {
 
   const handlePay = async (id: string) => {
     try {
-      const res = await fetch('/api/payments/mercadopago/create', {
+      const res = await fetch('/api/payments/transbank/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reservationId: id }),
@@ -124,7 +125,7 @@ function MyReservationsContent() {
       }
 
       const payment = await res.json();
-      window.location.href = payment.url;
+      redirectToWebpay(payment.url, payment.token);
     } catch (error: any) {
       alert(error.message || 'Error al iniciar pago');
     }

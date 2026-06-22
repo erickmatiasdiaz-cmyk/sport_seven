@@ -23,11 +23,9 @@ ENABLE_PUBLIC_REGISTRATION="true"
 BOOTSTRAP_ADMIN_EMAIL=""
 BOOTSTRAP_ADMIN_PASSWORD=""
 NEXT_PUBLIC_APP_URL="https://tu-dominio.vercel.app"
-NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY="APP_USR-tu-public-key"
-MERCADOPAGO_ACCESS_TOKEN="APP_USR-o-TEST-token"
-MERCADOPAGO_WEBHOOK_SECRET="clave-secreta-webhook"
-MERCADOPAGO_SANDBOX="false"
-MERCADOPAGO_TEST_PAYER_EMAIL=""
+TRANSBANK_ENVIRONMENT="integration"
+TRANSBANK_COMMERCE_CODE=""
+TRANSBANK_API_KEY=""
 PAYMENT_MODE="full"
 RESERVATION_DEPOSIT_AMOUNT="5000"
 PAYMENT_HOLD_MINUTES="5"
@@ -73,29 +71,25 @@ npx prisma db seed
 - Las APIs ya no aceptan `userId`, `userRole` ni `x-user-role` desde el cliente como autorizacion.
 - Supabase tiene RLS habilitado y politicas deny-all para la Data API.
 - La base bloquea reservas solapadas por cancha, fecha y horario.
-- Mercado Pago Checkout Pro confirma reservas solo cuando el webhook informa pago aprobado.
+- Transbank Webpay Plus confirma reservas solo tras un `commit` autorizado contra Transbank.
 - `ENABLE_BOOTSTRAP_DATA` debe permanecer en `false` en produccion.
 - `ENABLE_PUBLIC_REGISTRATION` permite que clientes creen cuenta desde el login; las pantallas admin siguen protegidas por rol.
 
-## Mercado Pago
+## Transbank Webpay Plus
 
-El flujo de pago usa Checkout Pro:
+El flujo de pago usa Webpay Plus:
 
 1. La reserva se crea como `pending_payment` y retiene el horario solo por `PAYMENT_HOLD_MINUTES`.
-2. Se crea una preferencia de Mercado Pago.
-3. El usuario paga en Mercado Pago.
-4. El webhook `/api/payments/mercadopago/webhook` consulta el pago en Mercado Pago.
-5. Si el pago esta `approved`, la reserva pasa a `confirmed`.
+2. `/api/payments/transbank/create` inicia una transaccion en Webpay y devuelve `{ url, token }`.
+3. El navegador hace un POST de formulario con `token_ws` a la URL de Webpay y el usuario paga.
+4. Webpay redirige de vuelta a `/api/payments/transbank/commit`, que hace el `commit` contra Transbank.
+5. Si la transaccion queda `AUTHORIZED` (response_code 0), la reserva pasa a `confirmed`; si no, a `payment_failed`.
 
-Configura en Mercado Pago Developers el webhook productivo:
-
-```txt
-https://tu-dominio.vercel.app/api/payments/mercadopago/webhook
-```
+A diferencia de un webhook, la confirmacion es sincrona en el retorno del navegador. La `return_url` se arma desde `NEXT_PUBLIC_APP_URL`, por lo que debe apuntar al dominio publico.
 
 Si `PAYMENT_MODE=full`, se cobra el precio completo de la cancha. Si `PAYMENT_MODE=deposit`, se cobra el monto fijo de `RESERVATION_DEPOSIT_AMOUNT`.
 
-Para pruebas demo con Mercado Pago, configura `MERCADOPAGO_SANDBOX="true"` y, si usas una cuenta compradora de prueba, define `MERCADOPAGO_TEST_PAYER_EMAIL` con el email de esa cuenta.
+Para pruebas usa `TRANSBANK_ENVIRONMENT="integration"` (con las credenciales vacias toma las llaves publicas de integracion de Transbank). Para cobros reales, define `TRANSBANK_ENVIRONMENT="production"`, `TRANSBANK_COMMERCE_CODE` y `TRANSBANK_API_KEY` con las credenciales que entrega Transbank.
 
 ## Acceso
 

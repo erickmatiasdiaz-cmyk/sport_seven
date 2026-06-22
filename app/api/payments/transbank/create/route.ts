@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
-import {
-  createMercadoPagoPreference,
-  getMercadoPagoCheckoutUrl,
-  getReservationPaymentAmount,
-} from '@/lib/mercadopago';
+import { getReservationPaymentAmount } from '@/lib/reservations';
+import { createWebpayTransaction } from '@/lib/transbank';
 
 function getAppUrl(request: NextRequest) {
   const configuredUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -26,13 +23,7 @@ export async function POST(request: NextRequest) {
 
     const reservation = await prisma.reservation.findUnique({
       where: { id: reservationId },
-      include: {
-        court: true,
-        payments: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
-      },
+      include: { court: true },
     });
 
     if (!reservation) {
@@ -50,11 +41,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingPayment = reservation.payments[0];
-    if (existingPayment?.status === 'pending' && existingPayment.checkoutUrl) {
-      return NextResponse.json({ url: existingPayment.checkoutUrl });
-    }
-
     const amount = getReservationPaymentAmount(
       reservation.court.price60,
       reservation.court.price90,
@@ -65,47 +51,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Monto de pago invalido' }, { status: 400 });
     }
 
-    const title = `${reservation.court.name} ${reservation.date} ${reservation.startTime}`;
-    const preference = await createMercadoPagoPreference({
-      reservationId: reservation.id,
-      payerEmail: process.env.MERCADOPAGO_TEST_PAYER_EMAIL || user.email,
-      payerName: reservation.customerName,
-      amount,
-      title,
-      appUrl: getAppUrl(request),
-    });
+    // buy_order admite hasta 26 caracteres alfanumericos; un cuid (25) entra justo.
+    const buyOrder = reservation.id.slice(0, 26);
+    const returnUrl = `${getAppUrl(request)}/api/payments/transbank/commit`;
 
-    const checkoutUrl = getMercadoPagoCheckoutUrl(preference);
-    if (!checkoutUrl) {
-      return NextResponse.json(
-        { error: 'Mercado Pago no entrego URL de checkout' },
-        { status: 500 }
-      );
-    }
+    // Cada intento crea una transaccion nueva: el token de Webpay es de un solo
+    // uso y caduca, por lo que no reutilizamos el anterior.
+    const transaction = await createWebpayTransaction({
+      buyOrder,
+      sessionId: reservation.id,
+      amount,
+      returnUrl,
+    });
 
     await prisma.payment.upsert({
       where: { externalReference: reservation.id },
       update: {
+        provider: 'transbank',
         amount,
-        preferenceId: preference.id,
-        checkoutUrl,
+        token: transaction.token,
+        buyOrder,
+        checkoutUrl: transaction.url,
         status: 'pending',
+        rawStatus: null,
+        providerPaymentId: null,
+        authorizationCode: null,
+        paymentTypeCode: null,
+        installments: null,
+        paidAt: null,
       },
       create: {
         reservationId: reservation.id,
         externalReference: reservation.id,
+        provider: 'transbank',
         amount,
-        preferenceId: preference.id,
-        checkoutUrl,
+        token: transaction.token,
+        buyOrder,
+        checkoutUrl: transaction.url,
         status: 'pending',
       },
     });
 
-    return NextResponse.json({ url: checkoutUrl });
+    return NextResponse.json({ url: transaction.url, token: transaction.token });
   } catch {
-    return NextResponse.json(
-      { error: 'Error al crear pago' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear pago' }, { status: 500 });
   }
 }
