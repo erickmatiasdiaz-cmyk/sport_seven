@@ -42,6 +42,7 @@ function MyReservationsContent() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(success === 'true' || paymentResult === 'success');
+  const [showFailure, setShowFailure] = useState(paymentResult === 'failure');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -52,6 +53,13 @@ function MyReservationsContent() {
       return () => clearTimeout(timer);
     }
   }, [showSuccess]);
+
+  useEffect(() => {
+    if (showFailure) {
+      const timer = setTimeout(() => setShowFailure(false), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [showFailure]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -381,6 +389,23 @@ function MyReservationsContent() {
               </svg>
             </div>
             <p className="font-semibold text-sm">¡Reserva creada exitosamente!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Failure Toast */}
+      {showFailure && (
+        <div className="mx-4 mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-2xl animate-slide-down shadow-sm">
+          <div className="flex items-start gap-2">
+            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-sm">Pago rechazado o cancelado</p>
+              <p className="text-xs text-red-600 mt-0.5">La reserva no se concretó. Puedes intentar nuevamente con otro medio de pago.</p>
+            </div>
           </div>
         </div>
       )}
